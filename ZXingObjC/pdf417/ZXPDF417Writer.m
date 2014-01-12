@@ -57,13 +57,27 @@
   if (![encoder generateBarcodeLogic:contents errorCorrectionLevel:errorCorrectionLevel error:error]) {
     return nil;
   }
+    
+    ZXBarcodeMatrix* barcodeMatrix = [encoder barcodeMatrix];
+    
+    int cols = barcodeMatrix.width;
+    int rows = barcodeMatrix.height;
+    
+//    int lineThickness = height / rows;
+    int lineThickness = width / (cols + 69);
+    int aspectRatio = height / (lineThickness * rows);
+    
 
-  int lineThickness = 2;
-  int aspectRatio = 4;
+    
+    // 垂直方向线的最小宽度
+//  int lineThickness = 2;
+//    
+//    // 宽高比
+//  int aspectRatio = 1;
 
   int scaleHeight;
   int scaleWidth;
-  int8_t **originalScale = [[encoder barcodeMatrix] scaledMatrixWithHeight:&scaleHeight width:&scaleWidth xScale:lineThickness yScale:aspectRatio * lineThickness];
+  int8_t **originalScale = [barcodeMatrix scaledMatrixWithHeight:&scaleHeight width:&scaleWidth xScale:lineThickness yScale:aspectRatio * lineThickness];
   BOOL rotated = NO;
   if ((height > width) ^ (scaleWidth < scaleHeight)) {
     int8_t **oldOriginalScale = originalScale;
@@ -105,7 +119,7 @@
  */
 - (ZXBitMatrix *)bitMatrixFrombitArray:(int8_t **)input height:(int)height width:(int)width {
   // Creates a small whitespace boarder around the barcode
-  int whiteSpace = 30;
+  int whiteSpace = 5;
 
   // Creates the bitmatrix with extra space for whtespace
   ZXBitMatrix *output = [[ZXBitMatrix alloc] initWithWidth:width + 2 * whiteSpace height:height + 2 * whiteSpace];

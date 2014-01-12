@@ -36,13 +36,14 @@
                                  userInfo:nil];
   }
 
-  int sidesMargin = [self defaultMargin];
+    int sidesMargin = [self defaultMargin:(ZXBarcodeFormat)format];
   if (hints && hints.margin) {
     sidesMargin = hints.margin.intValue;
   }
 
   int length;
   BOOL *code = [self encode:contents length:&length];
+    
   ZXBitMatrix *result = [self renderResult:code length:length width:width height:height sidesMargin:sidesMargin];
   free(code);
   return result;
@@ -51,12 +52,19 @@
 - (ZXBitMatrix *)renderResult:(BOOL *)code length:(int)length width:(int)width height:(int)height sidesMargin:(int)sidesMargin {
   int inputWidth = length;
   // Add quiet zone on both sides.
-  int fullWidth = inputWidth + sidesMargin;
+  int fullWidth = inputWidth + (sidesMargin<<1);
   int outputWidth = MAX(width, fullWidth);
   int outputHeight = MAX(1, height);
 
   int multiple = outputWidth / fullWidth;
-  int leftPadding = (outputWidth - (inputWidth * multiple)) / 2;
+  int leftPadding = (outputWidth - (fullWidth * multiple)) / 2;
+  leftPadding += sidesMargin * multiple;
+    
+  if (leftPadding*2 > inputWidth*1.1)
+  {
+      leftPadding = (leftPadding*2 - inputWidth)/2;
+      multiple++ ;
+  }
 
   ZXBitMatrix *output = [ZXBitMatrix bitMatrixWithWidth:outputWidth height:outputHeight];
   for (int inputX = 0, outputX = leftPadding; inputX < inputWidth; inputX++, outputX += multiple) {
@@ -81,6 +89,12 @@
     color = !color; // flip color after each segment
   }
   return numAdded;
+}
+
+- (int)defaultMargin:(ZXBarcodeFormat)format{
+    // CodaBar spec requires a side margin to be more than ten times wider than narrow space.
+    // This seems like a decent idea for a default for all formats.
+    return format == kBarcodeFormatCodabar ? 10 : 5;
 }
 
 - (int)defaultMargin {

@@ -28,14 +28,17 @@ const char END_CHARS[END_CHARS_LEN] = "TN*E";
 - (BOOL *)encode:(NSString *)contents length:(int *)pLength {
   // Verify input and calculate decoded length.
   if (![ZXCodaBarReader arrayContains:(char *)START_CHARS length:START_CHARS_LEN key:[[contents uppercaseString] characterAtIndex:0]]) {
-    @throw [NSException exceptionWithName:NSInvalidArgumentException
-                                   reason:[NSString stringWithFormat:@"Codabar should start with one of the following: %@", [NSString stringWithCString:START_CHARS encoding:NSUTF8StringEncoding]]
-                                 userInfo:nil];
+//    @throw [NSException exceptionWithName:NSInvalidArgumentException
+//                                   reason:[NSString stringWithFormat:@"Codabar should start with one of the following: %@", [NSString stringWithCString:START_CHARS encoding:NSUTF8StringEncoding]]
+//                                 userInfo:nil];
+      contents = [NSString stringWithFormat:@"A%@", contents];
   }
-  if (![ZXCodaBarReader arrayContains:(char *)END_CHARS length:END_CHARS_LEN key:[[contents uppercaseString] characterAtIndex:contents.length - 1]]) {
-    @throw [NSException exceptionWithName:NSInvalidArgumentException
-                                   reason:[NSString stringWithFormat:@"Codabar should end with one of the following: %@", [NSString stringWithCString:END_CHARS encoding:NSUTF8StringEncoding]]
-                                 userInfo:nil];
+  if (![ZXCodaBarReader arrayContains:(char *)START_CHARS length:END_CHARS_LEN key:[[contents uppercaseString] characterAtIndex:contents.length - 1]]
+      && ![ZXCodaBarReader arrayContains:(char *)END_CHARS length:END_CHARS_LEN key:[[contents uppercaseString] characterAtIndex:contents.length - 1]]) {
+//    @throw [NSException exceptionWithName:NSInvalidArgumentException
+//                                   reason:[NSString stringWithFormat:@"Codabar should end with one of the following: %@", [NSString stringWithCString:END_CHARS encoding:NSUTF8StringEncoding]]
+//                                 userInfo:nil];
+    contents = [NSString stringWithFormat:@"%@A", contents];
   }
   // The start character and the end character are decoded to 10 length each.
   int resultLength = 20;

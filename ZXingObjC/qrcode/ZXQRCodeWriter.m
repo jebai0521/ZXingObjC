@@ -22,7 +22,7 @@
 #import "ZXQRCode.h"
 #import "ZXQRCodeWriter.h"
 
-int const QUIET_ZONE_SIZE = 4;
+int const QUIET_ZONE_SIZE = 1;
 
 @implementation ZXQRCodeWriter
 
