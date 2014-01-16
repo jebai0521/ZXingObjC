@@ -68,7 +68,6 @@ const NSStringEncoding ZX_DEFAULT_AZTEC_ENCODING = NSISOLatin1StringEncoding;
     int outputWidth = MAX(width, inputWidth);
     int outputHeight = MAX(height, inputHeight);
     
-    
     int multiple = MIN(outputWidth / inputWidth, outputHeight / inputHeight);
     int leftPadding = (outputWidth - (inputWidth * multiple)) / 2;
     int topPadding = (outputHeight - (inputHeight * multiple)) / 2;
@@ -76,8 +75,10 @@ const NSStringEncoding ZX_DEFAULT_AZTEC_ENCODING = NSISOLatin1StringEncoding;
     ZXBitMatrix* output = [[ZXBitMatrix alloc] initWithWidth:outputWidth height:outputHeight];
     
     for (int inputY = 0, outputY = topPadding; inputY < inputHeight; inputY++, outputY += multiple) {
+        // Write the contents of this row of the barcode
         for (int inputX = 0, outputX = leftPadding; inputX < inputWidth; inputX++, outputX += multiple) {
             if ([input getX:inputX y:inputY]) {
+//                output setRegion(outputX, outputY, multiple, multiple);
                 [output setRegionAtLeft:outputX top:outputY width:multiple height:multiple];
             }
         }
