@@ -16,6 +16,7 @@
 
 #import "ZXErrors.h"
 #import "ZXPDF417HighLevelEncoder.h"
+#import "JKBigInteger.h"
 
 /**
  * code for Text compaction
@@ -363,18 +364,51 @@ unichar PUNCTUATION[PUNCTUATION_LEN];
 
 + (void)encodeNumeric:(NSString *)msg startpos:(int)startpos count:(int)count buffer:(NSMutableString *)sb {
   int idx = 0;
+  NSLog(@"msg[%@]", msg);
+  NSLog(@"startpos[%d]", startpos);
+  NSLog(@"count[%d]", count);
+  NSLog(@"sb[%@]", sb);
+  
   NSMutableString *tmp = [NSMutableString stringWithCapacity:count / 3 + 1];
   while (idx < count - 1) {
     [tmp setString:@""];
     int len = MIN(44, count - idx);
+    NSLog(@"idx[%d]", idx);
+    NSLog(@"len[%d]", len);
     NSString *part = [@"1" stringByAppendingString:[msg substringWithRange:NSMakeRange(startpos + idx, len)]];
-    long long bigint = [part longLongValue];
-    do {
-      long c = bigint % 900;
-      [tmp appendFormat:@"%C", (unichar) c];
-      bigint /= 900;
-    } while (bigint != 0);
-
+    NSLog(@"part[%@]", part);
+    unsigned long long bigint = [part longLongValue];
+    
+    if ([[NSString stringWithFormat:@"%llu", bigint] isEqualToString:part])
+    {
+      NSLog(@"bigint[%lld]", bigint);
+      do {
+        long c = bigint % 900;
+        NSLog(@"c[%C]", (unichar)c);
+        NSLog(@"value[%ld]", c);
+        [tmp appendFormat:@"%C", (unichar) c];
+        bigint /= 900;
+        NSLog(@"bigint[%lld]", bigint);
+      } while (bigint != 0);
+      
+      NSLog(@"tmp[%@]", tmp);
+    }
+    else
+    {
+      JKBigInteger* integer = [[JKBigInteger alloc] initWithString:part];
+      JKBigInteger* feed = [[JKBigInteger alloc] initWithUnsignedLong:900];
+      do {
+        JKBigInteger* c = [integer remainder:feed];
+        NSLog(@"c[%C]", (unichar)[c unsignedIntValue]);
+        NSLog(@"value[%ld]", [c unsignedIntValue]);
+        [tmp appendFormat:@"%C", (unichar) [c unsignedIntValue]];
+        integer = [integer divide:feed];
+        NSLog(@"integer[%@]", integer);
+      } while ([integer unsignedIntValue] != 0);
+      
+      NSLog(@"tmp[%@]", tmp);
+    }
+    
     //Reverse temporary string
     for (int i = (int)tmp.length - 1; i >= 0; i--) {
       [sb appendFormat:@"%C", [tmp characterAtIndex:i]];
