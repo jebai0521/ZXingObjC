@@ -97,9 +97,11 @@
     multiple = outputWidth / fullWidth;
     outputWidth = fullWidth * multiple;
   }
+    
+  int leftPadding = sidesMargin * multiple;
   
   ZXBitMatrix *output = [ZXBitMatrix bitMatrixWithWidth:outputWidth height:outputHeight];
-  for (int inputX = 0, outputX = 0; inputX < inputWidth; inputX++, outputX += multiple) {
+  for (int inputX = 0, outputX = leftPadding; inputX < inputWidth; inputX++, outputX += multiple) {
     if (code[inputX]) {
       [output setRegionAtLeft:outputX top:0 width:multiple height:outputHeight];
     }

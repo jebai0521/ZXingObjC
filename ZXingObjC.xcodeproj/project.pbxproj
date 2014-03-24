@@ -1581,6 +1581,8 @@
 		25FE5D4016D0B84C00826CDB /* RSSExpandedStackedInternalTestCase.m in Sources */ = {isa = PBXBuildFile; fileRef = 25FE5D3F16D0B84C00826CDB /* RSSExpandedStackedInternalTestCase.m */; };
 		25FE5D4316D0B8B200826CDB /* TestCaseUtil.m in Sources */ = {isa = PBXBuildFile; fileRef = 25FE5D4216D0B8B200826CDB /* TestCaseUtil.m */; };
 		25FE5D4516D1997C00826CDB /* Resources in Resources */ = {isa = PBXBuildFile; fileRef = 25FE5D4416D1997C00826CDB /* Resources */; };
+		7D3AE8A5188F86630045C4FB /* ZXUPCEWriter.h in Headers */ = {isa = PBXBuildFile; fileRef = 7D3AE8A3188F86630045C4FB /* ZXUPCEWriter.h */; };
+		7D3AE8A6188F86630045C4FB /* ZXUPCEWriter.m in Sources */ = {isa = PBXBuildFile; fileRef = 7D3AE8A4188F86630045C4FB /* ZXUPCEWriter.m */; };
 		7D50BD49188858DA00672623 /* JKBigInteger.h in Headers */ = {isa = PBXBuildFile; fileRef = 7D50BD42188858DA00672623 /* JKBigInteger.h */; };
 		7D50BD4A188858DA00672623 /* JKBigInteger.m in Sources */ = {isa = PBXBuildFile; fileRef = 7D50BD43188858DA00672623 /* JKBigInteger.m */; };
 		7D50BD4B188858DA00672623 /* tommath.c in Sources */ = {isa = PBXBuildFile; fileRef = 7D50BD45188858DA00672623 /* tommath.c */; };
@@ -2300,6 +2302,8 @@
 		25FE5D4116D0B8B100826CDB /* TestCaseUtil.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = TestCaseUtil.h; sourceTree = "<group>"; };
 		25FE5D4216D0B8B200826CDB /* TestCaseUtil.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = TestCaseUtil.m; sourceTree = "<group>"; };
 		25FE5D4416D1997C00826CDB /* Resources */ = {isa = PBXFileReference; lastKnownFileType = folder; path = Resources; sourceTree = "<group>"; };
+		7D3AE8A3188F86630045C4FB /* ZXUPCEWriter.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ZXUPCEWriter.h; sourceTree = "<group>"; };
+		7D3AE8A4188F86630045C4FB /* ZXUPCEWriter.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = ZXUPCEWriter.m; sourceTree = "<group>"; };
 		7D50BD42188858DA00672623 /* JKBigInteger.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = JKBigInteger.h; sourceTree = "<group>"; };
 		7D50BD43188858DA00672623 /* JKBigInteger.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = JKBigInteger.m; sourceTree = "<group>"; };
 		7D50BD45188858DA00672623 /* tommath.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = tommath.c; sourceTree = "<group>"; };
@@ -2877,6 +2881,8 @@
 				25403EA9166A9DF300E13304 /* ZXUPCEANWriter.m */,
 				25403EAA166A9DF300E13304 /* ZXUPCEReader.h */,
 				25403EAB166A9DF300E13304 /* ZXUPCEReader.m */,
+				7D3AE8A3188F86630045C4FB /* ZXUPCEWriter.h */,
+				7D3AE8A4188F86630045C4FB /* ZXUPCEWriter.m */,
 			);
 			path = oned;
 			sourceTree = "<group>";
@@ -3591,6 +3597,7 @@
 				25403D58166A9A0800E13304 /* ZXBizcardResultParser.h in Headers */,
 				25403D5A166A9A0800E13304 /* ZXBookmarkDoCoMoResultParser.h in Headers */,
 				25403D5C166A9A0800E13304 /* ZXCalendarParsedResult.h in Headers */,
+				7D3AE8A5188F86630045C4FB /* ZXUPCEWriter.h in Headers */,
 				2519AB7617FE649000A71C45 /* ZXPDF417Codeword.h in Headers */,
 				25403D5E166A9A0800E13304 /* ZXEmailAddressParsedResult.h in Headers */,
 				25403D60166A9A0800E13304 /* ZXEmailAddressResultParser.h in Headers */,
@@ -4596,6 +4603,7 @@
 				25403F0F166A9DF400E13304 /* ZXUPCEANExtension5Support.m in Sources */,
 				25403F11166A9DF400E13304 /* ZXUPCEANExtensionSupport.m in Sources */,
 				25403F13166A9DF400E13304 /* ZXUPCEANReader.m in Sources */,
+				7D3AE8A6188F86630045C4FB /* ZXUPCEWriter.m in Sources */,
 				25403F15166A9DF400E13304 /* ZXUPCEANWriter.m in Sources */,
 				25403F17166A9DF400E13304 /* ZXUPCEReader.m in Sources */,
 				25403F3D166A9EB500E13304 /* ZXModulusGF.m in Sources */,

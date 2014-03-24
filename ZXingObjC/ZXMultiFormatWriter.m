@@ -27,6 +27,7 @@
 #import "ZXPDF417Writer.h"
 #import "ZXQRCodeWriter.h"
 #import "ZXUPCAWriter.h"
+#import "ZXUPCEWriter.h"
 
 @implementation ZXMultiFormatWriter
 
@@ -51,6 +52,10 @@
 
     case kBarcodeFormatUPCA:
       writer = [[ZXUPCAWriter alloc] init];
+          break;
+          
+    case kBarcodeFormatUPCE:
+      writer = [[ZXUPCEWriter alloc] init];
       break;
 
     case kBarcodeFormatQRCode:
