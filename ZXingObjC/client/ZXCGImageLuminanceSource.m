@@ -174,55 +174,68 @@
   _top = top;
   size_t sourceWidth = CGImageGetWidth(cgimage);
   size_t sourceHeight = CGImageGetHeight(cgimage);
+  size_t selfWidth = self.width;
+  size_t selfHeight= self.height;
 
-  if (left + self.width > sourceWidth ||
-      top + self.height > sourceHeight) {
+  if (left + selfWidth > sourceWidth ||
+      top + selfHeight > sourceHeight) {
     [NSException raise:NSInvalidArgumentException format:@"Crop rectangle does not fit within image data."];
   }
 
   CGColorSpaceRef colorSpace = CGColorSpaceCreateDeviceRGB();
-  CGContextRef context = CGBitmapContextCreate(0, self.width, self.height, 8, self.width * 4, colorSpace, kCGBitmapByteOrder32Little | kCGImageAlphaPremultipliedLast);
+  CGContextRef context = CGBitmapContextCreate(NULL, selfWidth, selfHeight, 8, selfWidth * 4, colorSpace, kCGBitmapByteOrder32Little | kCGImageAlphaPremultipliedLast);
+  CGColorSpaceRelease(colorSpace);
+
   CGContextSetAllowsAntialiasing(context, FALSE);
   CGContextSetInterpolationQuality(context, kCGInterpolationNone);
 
   if (top || left) {
-    CGContextClipToRect(context, CGRectMake(0, 0, self.width, self.height));
+    CGContextClipToRect(context, CGRectMake(0, 0, selfWidth, selfHeight));
   }
 
-  CGContextDrawImage(context, CGRectMake(-left, -top, self.width, self.height), self.image);
+  CGContextDrawImage(context, CGRectMake(-left, -top, selfWidth, selfHeight), self.image);
 
-  uint32_t *pixelData = (uint32_t *) malloc(self.width * self.height * sizeof(uint32_t));
-  memcpy(pixelData, CGBitmapContextGetData(context), self.width * self.height * sizeof(uint32_t));
-  CGContextRelease(context);
-  CGColorSpaceRelease(colorSpace);
+  uint32_t *pixelData = CGBitmapContextGetData(context);
 
-  _data = (int8_t *)malloc(self.width * self.height * sizeof(int8_t));
+  _data = (int8_t *)malloc(selfWidth * selfHeight * sizeof(int8_t));
 
-  for (int i = 0; i < self.height * self.width; i++) {
-    uint32_t rgbPixel=pixelData[i];
+  dispatch_apply(selfHeight, dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_LOW, 0), ^(size_t idx) {
+    size_t stripe_start = idx * selfWidth;
+    size_t stripe_stop = stripe_start + selfWidth;
 
-    float red = (rgbPixel>>24)&0xFF;
-    float green = (rgbPixel>>16)&0xFF;
-    float blue = (rgbPixel>>8)&0xFF;
-    float alpha = (float)(rgbPixel & 0xFF) / 255.0f;
+    for (size_t i = stripe_start; i < stripe_stop; i++) {
+      uint32_t rgbPixelIn = pixelData[i];
+      uint32_t rgbPixelOut = 0;
 
-    // ImageIO premultiplies all PNGs, so we have to "un-premultiply them":
-    // http://code.google.com/p/cocos2d-iphone/issues/detail?id=697#c26
-    red = round((red / alpha) - 0.001f);
-    green = round((green / alpha) - 0.001f);
-    blue = round((blue / alpha) - 0.001f);
+      uint32_t red = (rgbPixelIn >> 24) & 0xFF;
+      uint32_t green = (rgbPixelIn >> 16) & 0xFF;
+      uint32_t blue = (rgbPixelIn >> 8) & 0xFF;
+      uint32_t alpha = (rgbPixelIn & 0xFF);
 
-    if (red == green && green == blue) {
-      _data[i] = red;
-    } else {
-      _data[i] = (306 * (int)red +
-                 601 * (int)green +
-                 117 * (int)blue +
-                (0x200)) >> 10; // 0x200 = 1<<9, half an lsb of the result to force rounding
+      // ImageIO premultiplies all PNGs, so we have to "un-premultiply them":
+      // http://code.google.com/p/cocos2d-iphone/issues/detail?id=697#c26
+      red   =   red > 0 ? ((red   << 20) / (alpha << 2)) >> 10 : 0;
+      green = green > 0 ? ((green << 20) / (alpha << 2)) >> 10 : 0;
+      blue  =  blue > 0 ? ((blue  << 20) / (alpha << 2)) >> 10 : 0;
+
+      if (red == green && green == blue) {
+        rgbPixelOut = red;
+      } else {
+        rgbPixelOut = (306 * red +
+                       601 * green +
+                       117 * blue +
+                       (0x200)) >> 10; // 0x200 = 1<<9, half an lsb of the result to force rounding
+      }
+
+      if (rgbPixelOut > 255) {
+        rgbPixelOut = 255;
+      }
+
+      _data[i] = rgbPixelOut;
     }
-  }
+  });
 
-  free(pixelData);
+  CGContextRelease(context);
 
   _top = top;
   _left = left;
