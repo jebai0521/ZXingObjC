@@ -2430,7 +2430,9 @@
 				2540438A166AB8EA00E13304 /* OS X Frameworks */,
 				25403CB4166A96FA00E13304 /* Products */,
 			);
+			indentWidth = 2;
 			sourceTree = "<group>";
+			tabWidth = 2;
 		};
 		25403CB4166A96FA00E13304 /* Products */ = {
 			isa = PBXGroup;
