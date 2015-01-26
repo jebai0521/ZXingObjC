@@ -54,6 +54,11 @@ int const QUIET_ZONE_SIZE = 1;
     }
   }
 
+  if (hints == nil) {
+    hints = [ZXEncodeHints hints];
+  }
+  
+  hints.encoding = NSUTF8StringEncoding;
   ZXQRCode *code = [ZXEncoder encode:contents ecLevel:errorCorrectionLevel hints:hints error:error];
   return [self renderResult:code width:width height:height quietZone:quietZone];
 }
