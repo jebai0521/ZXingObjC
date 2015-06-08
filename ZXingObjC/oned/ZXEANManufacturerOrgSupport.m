@@ -18,8 +18,8 @@
 
 @interface ZXEANManufacturerOrgSupport ()
 
-@property (nonatomic, strong) NSMutableArray *countryIdentifiers;
-@property (nonatomic, strong) NSMutableArray *ranges;
+@property (nonatomic, strong, readonly) NSMutableArray *countryIdentifiers;
+@property (nonatomic, strong, readonly) NSMutableArray *ranges;
 
 @end
 
@@ -36,7 +36,7 @@
 
 - (NSString *)lookupCountryIdentifier:(NSString *)productCode {
   [self initIfNeeded];
-  
+
   int prefix = [[productCode substringToIndex:3] intValue];
   NSUInteger max = self.ranges.count;
 
@@ -61,7 +61,7 @@
 }
 
 - (void)initIfNeeded {
-  @synchronized(self.ranges) {
+  @synchronized (self.ranges) {
     if ([self.ranges count] > 0) {
       return;
     }

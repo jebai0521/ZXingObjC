@@ -15,16 +15,18 @@
  */
 
 #import "ZXBitMatrix.h"
-#import "ZXDataMask.h"
+#import "ZXByteArray.h"
 #import "ZXErrors.h"
-#import "ZXFormatInformation.h"
 #import "ZXQRCodeBitMatrixParser.h"
+#import "ZXQRCodeDataMask.h"
+#import "ZXQRCodeFormatInformation.h"
 #import "ZXQRCodeVersion.h"
 
 @interface ZXQRCodeBitMatrixParser ()
 
-@property (nonatomic, strong) ZXBitMatrix *bitMatrix;
-@property (nonatomic, strong) ZXFormatInformation *parsedFormatInfo;
+@property (nonatomic, strong, readonly) ZXBitMatrix *bitMatrix;
+@property (nonatomic, assign) BOOL shouldMirror;
+@property (nonatomic, strong) ZXQRCodeFormatInformation *parsedFormatInfo;
 @property (nonatomic, strong) ZXQRCodeVersion *parsedVersion;
 
 @end
@@ -34,7 +36,7 @@
 - (id)initWithBitMatrix:(ZXBitMatrix *)bitMatrix error:(NSError **)error {
   int dimension = bitMatrix.height;
   if (dimension < 21 || (dimension & 0x03) != 1) {
-    if (error) *error = FormatErrorInstance();
+    if (error) *error = ZXFormatErrorInstance();
     return nil;
   }
 
@@ -46,10 +48,7 @@
   return self;
 }
 
-/**
- * Reads format information from one of its two locations within the QR Code.
- */
-- (ZXFormatInformation *)readFormatInformationWithError:(NSError **)error {
+- (ZXQRCodeFormatInformation *)readFormatInformationWithError:(NSError **)error {
   if (self.parsedFormatInfo != nil) {
     return self.parsedFormatInfo;
   }
@@ -79,24 +78,20 @@
     formatInfoBits2 = [self copyBit:i j:8 versionBits:formatInfoBits2];
   }
 
-  self.parsedFormatInfo = [ZXFormatInformation decodeFormatInformation:formatInfoBits1 maskedFormatInfo2:formatInfoBits2];
+  self.parsedFormatInfo = [ZXQRCodeFormatInformation decodeFormatInformation:formatInfoBits1 maskedFormatInfo2:formatInfoBits2];
   if (self.parsedFormatInfo != nil) {
     return self.parsedFormatInfo;
   }
-  if (error) *error = FormatErrorInstance();
+  if (error) *error = ZXFormatErrorInstance();
   return nil;
 }
 
-
-/**
- * Reads version information from one of its two locations within the QR Code.
- */
 - (ZXQRCodeVersion *)readVersionWithError:(NSError **)error {
   if (self.parsedVersion != nil) {
     return self.parsedVersion;
   }
   int dimension = self.bitMatrix.height;
-  int provisionalVersion = (dimension - 17) >> 2;
+  int provisionalVersion = (dimension - 17) / 4;
   if (provisionalVersion <= 6) {
     return [ZXQRCodeVersion versionForNumber:provisionalVersion];
   }
@@ -129,22 +124,17 @@
     self.parsedVersion = theParsedVersion;
     return self.parsedVersion;
   }
-  if (error) *error = FormatErrorInstance();
+  if (error) *error = ZXFormatErrorInstance();
   return nil;
 }
 
 - (int)copyBit:(int)i j:(int)j versionBits:(int)versionBits {
-  return [self.bitMatrix getX:i y:j] ? (versionBits << 1) | 0x1 : versionBits << 1;
+  BOOL bit = self.shouldMirror ? [self.bitMatrix getX:j y:i] : [self.bitMatrix getX:i y:j];
+  return bit ? (versionBits << 1) | 0x1 : versionBits << 1;
 }
 
-
-/**
- * Reads the bits in the {@link BitMatrix} representing the finder pattern in the
- * correct order in order to reconstitute the codewords bytes contained within the
- * QR Code.
- */
-- (NSArray *)readCodewordsWithError:(NSError **)error {
-  ZXFormatInformation *formatInfo = [self readFormatInformationWithError:error];
+- (ZXByteArray *)readCodewordsWithError:(NSError **)error {
+  ZXQRCodeFormatInformation *formatInfo = [self readFormatInformationWithError:error];
   if (!formatInfo) {
     return nil;
   }
@@ -154,49 +144,80 @@
     return nil;
   }
 
-  ZXDataMask *dataMask = [ZXDataMask forReference:(int)[formatInfo dataMask]];
+  // Get the data mask for the format used in this QR Code. This will exclude
+  // some bits from reading as we wind through the bit matrix.
+  ZXQRCodeDataMask *dataMask = [ZXQRCodeDataMask forReference:[formatInfo dataMask]];
   int dimension = self.bitMatrix.height;
   [dataMask unmaskBitMatrix:self.bitMatrix dimension:dimension];
+
   ZXBitMatrix *functionPattern = [version buildFunctionPattern];
+
   BOOL readingUp = YES;
-  NSMutableArray *result = [NSMutableArray array];
+  ZXByteArray *result = [[ZXByteArray alloc] initWithLength:version.totalCodewords];
   int resultOffset = 0;
   int currentByte = 0;
   int bitsRead = 0;
-
+  // Read columns in pairs, from right to left
   for (int j = dimension - 1; j > 0; j -= 2) {
     if (j == 6) {
+      // Skip whole column with vertical alignment pattern;
+      // saves time and makes the other code proceed more cleanly
       j--;
     }
-
+    // Read alternatingly from bottom to top then top to bottom
     for (int count = 0; count < dimension; count++) {
       int i = readingUp ? dimension - 1 - count : count;
-
       for (int col = 0; col < 2; col++) {
+        // Ignore bits covered by the function pattern
         if (![functionPattern getX:j - col y:i]) {
+          // Read a bit
           bitsRead++;
           currentByte <<= 1;
           if ([self.bitMatrix getX:j - col y:i]) {
             currentByte |= 1;
           }
+          // If we've made a whole byte, save it off
           if (bitsRead == 8) {
-            [result addObject:@((char)currentByte)];
-            resultOffset++;
+            result.array[resultOffset++] = (int8_t) currentByte;
             bitsRead = 0;
             currentByte = 0;
           }
         }
       }
     }
-
-    readingUp ^= YES;
+    readingUp ^= YES; // readingUp = !readingUp; // switch directions
   }
-
   if (resultOffset != [version totalCodewords]) {
-    if (error) *error = FormatErrorInstance();
+    if (error) *error = ZXFormatErrorInstance();
     return nil;
   }
   return result;
+}
+
+- (void)remask {
+  if (!self.parsedFormatInfo) {
+    return; // We have no format information, and have no data mask
+  }
+  ZXQRCodeDataMask *dataMask = [ZXQRCodeDataMask forReference:self.parsedFormatInfo.dataMask];
+  int dimension = self.bitMatrix.height;
+  [dataMask unmaskBitMatrix:self.bitMatrix dimension:dimension];
+}
+
+- (void)setMirror:(BOOL)mirror {
+  self.parsedVersion = nil;
+  self.parsedFormatInfo = nil;
+  self.shouldMirror = mirror;
+}
+
+- (void)mirror {
+  for (int x = 0; x < self.bitMatrix.width; x++) {
+    for (int y = x + 1; y < self.bitMatrix.height; y++) {
+      if ([self.bitMatrix getX:x y:y] != [self.bitMatrix getX:y y:x]) {
+        [self.bitMatrix flipX:y y:x];
+        [self.bitMatrix flipX:x y:y];
+      }
+    }
+  }
 }
 
 @end

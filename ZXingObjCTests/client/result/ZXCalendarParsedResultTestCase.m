@@ -19,11 +19,16 @@
 @implementation ZXCalendarParsedResultTestCase
 
 static double EPSILON = 0.0000000001;
-static NSDateFormatter *DATE_TIME_FORMAT = nil;
 
-+ (void)initialize {
-  DATE_TIME_FORMAT = [[NSDateFormatter alloc] init];
-  DATE_TIME_FORMAT.dateFormat = @"yyyyMMdd'T'HHmmss'Z'";
+- (NSDateFormatter *)makeGMTFormat {
+  NSDateFormatter *format = [[NSDateFormatter alloc] init];
+  format.dateFormat = @"yyyyMMdd'T'HHmmss'Z'";
+  format.timeZone = [NSTimeZone timeZoneWithName:@"GMT"];
+  return format;
+}
+
+- (void)setUp {
+  [NSTimeZone setDefaultTimeZone:[NSTimeZone timeZoneWithName:@"GMT"]];
 }
 
 - (void)testStartEnd {
@@ -143,6 +148,16 @@ static NSDateFormatter *DATE_TIME_FORMAT = nil;
                  longitude:-45.678];
 }
 
+- (void)testBadGeo {
+  // Not parsed as VEVENT
+  ZXResult *fakeResult = [[ZXResult alloc] initWithText:@"BEGIN:VCALENDAR\r\nBEGIN:VEVENT\r\n"
+                                                        @"GEO:-12.345\r\n"
+                                                        @"END:VEVENT\r\nEND:VCALENDAR"
+                                               rawBytes:nil resultPoints:nil format:kBarcodeFormatQRCode];
+  ZXParsedResult *result = [ZXResultParser parseResult:fakeResult];
+  XCTAssertEqual(kParsedResultTypeURI, result.type);
+}
+
 - (void)testOrganizer {
   [self doTestWithContents:@"BEGIN:VCALENDAR\r\nBEGIN:VEVENT\r\n"
                            @"DTSTART:20080504T123456Z\r\n"
@@ -239,26 +254,27 @@ static NSDateFormatter *DATE_TIME_FORMAT = nil;
                  attendees:(NSArray *)attendees
                   latitude:(double)latitude
                  longitude:(double)longitude {
-  ZXResult *fakeResult = [ZXResult resultWithText:contents rawBytes:NULL length:0 resultPoints:nil format:kBarcodeFormatQRCode];
+  ZXResult *fakeResult = [ZXResult resultWithText:contents rawBytes:nil resultPoints:nil format:kBarcodeFormatQRCode];
   ZXParsedResult *result = [ZXResultParser parseResult:fakeResult];
-  XCTAssertEqual(result.type, kParsedResultTypeCalendar, @"Types do not match");
+  XCTAssertEqual(kParsedResultTypeCalendar, result.type);
   ZXCalendarParsedResult *calResult = (ZXCalendarParsedResult *)result;
-  XCTAssertEqualObjects(calResult.description, description, @"Descriptions do not match");
-  XCTAssertEqualObjects(calResult.summary, summary, @"Summaries do not match");
-  XCTAssertEqualObjects(calResult.location, location, @"Locations do not match");
-  XCTAssertEqualObjects([DATE_TIME_FORMAT stringFromDate:calResult.start], startString, @"Starts do not match");
-  XCTAssertEqualObjects([DATE_TIME_FORMAT stringFromDate:calResult.end], endString, @"Ends do not match");
-  XCTAssertEqualObjects(organizer, calResult.organizer, @"Organizers do not match");
-  XCTAssertEqualObjects(attendees, calResult.attendees, @"Attendees do not match");
+  XCTAssertEqualObjects(description, calResult.description);
+  XCTAssertEqualObjects(summary, calResult.summary);
+  XCTAssertEqualObjects(location, calResult.location);
+  NSDateFormatter *format = [self makeGMTFormat];
+  XCTAssertEqualObjects(startString, [format stringFromDate:calResult.start]);
+  XCTAssertEqualObjects(endString, [format stringFromDate:calResult.end]);
+  XCTAssertEqualObjects(organizer, calResult.organizer);
+  XCTAssertEqualObjects(attendees, calResult.attendees);
   [self assertEqualOrNAN:latitude actual:calResult.latitude];
   [self assertEqualOrNAN:longitude actual:calResult.longitude];
 }
 
 - (void)assertEqualOrNAN:(double)expected actual:(double)actual {
   if (isnan(expected)) {
-    XCTAssertTrue(isnan(actual), @"Expected %f to be NAN", actual);
+    XCTAssertTrue(isnan(actual));
   } else {
-    XCTAssertEqualWithAccuracy(actual, expected, EPSILON, @"Expected %f to equal %f", actual, expected);
+    XCTAssertEqualWithAccuracy(expected, actual, EPSILON);
   }
 }
 

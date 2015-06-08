@@ -72,6 +72,48 @@
                       note:nil];
 }
 
+- (void)testVCardFullN {
+  [self doTestWithContents:@"BEGIN:VCARD\r\nVERSION:2.1\r\nN:Owen;Sean;T;Mr.;Esq.\r\nEND:VCARD"
+                     title:nil
+                     names:@[@"Mr. Sean T Owen Esq."]
+             pronunciation:nil
+                 addresses:nil
+                    emails:nil
+              phoneNumbers:nil
+                       org:nil
+                      urls:nil
+                  birthday:nil
+                      note:nil];
+}
+
+- (void)testVCardFullN2 {
+  [self doTestWithContents:@"BEGIN:VCARD\r\nVERSION:2.1\r\nN:Owen;Sean;;;\r\nEND:VCARD"
+                     title:nil
+                     names:@[@"Sean Owen"]
+             pronunciation:nil
+                 addresses:nil
+                    emails:nil
+              phoneNumbers:nil
+                       org:nil
+                      urls:nil
+                  birthday:nil
+                      note:nil];
+}
+
+- (void)testVCardFullN3 {
+  [self doTestWithContents:@"BEGIN:VCARD\r\nVERSION:2.1\r\nN:;Sean;;;\r\nEND:VCARD"
+                     title:nil
+                     names:@[@"Sean"]
+             pronunciation:nil
+                 addresses:nil
+                    emails:nil
+              phoneNumbers:nil
+                       org:nil
+                      urls:nil
+                  birthday:nil
+                      note:nil];
+}
+
 - (void)testVCardCaseInsensitive {
   [self doTestWithContents:@"begin:vcard\r\nadr;HOME:123 Main St\r\nVersion:2.1\r\nn:Owen;Sean\r\nEND:VCARD"
                      title:nil
@@ -204,20 +246,20 @@
                       urls:(NSArray *)urls
                   birthday:(NSString *)birthday
                       note:(NSString *)note {
-  ZXResult *fakeResult = [ZXResult resultWithText:contents rawBytes:NULL length:0 resultPoints:nil format:kBarcodeFormatQRCode];
+  ZXResult *fakeResult = [ZXResult resultWithText:contents rawBytes:nil resultPoints:nil format:kBarcodeFormatQRCode];
   ZXParsedResult *result = [ZXResultParser parseResult:fakeResult];
-  XCTAssertEqual(kParsedResultTypeAddressBook, result.type, @"Result type mismatch");
+  XCTAssertEqual(kParsedResultTypeAddressBook, result.type);
   ZXAddressBookParsedResult *addressResult = (ZXAddressBookParsedResult *)result;
-  XCTAssertEqualObjects(addressResult.title, title, @"Titles do not match");
-  XCTAssertEqualObjects(addressResult.names, names, @"Names do not match");
-  XCTAssertEqualObjects(addressResult.pronunciation, pronunciation, @"Pronunciation does not match");
-  XCTAssertEqualObjects(addressResult.addresses, addresses, @"Addresses do not match");
-  XCTAssertEqualObjects(addressResult.emails, emails, @"Emails do not match");
-  XCTAssertEqualObjects(addressResult.phoneNumbers, phoneNumbers, @"Phone numbers do not match");
-  XCTAssertEqualObjects(addressResult.org, org, @"Org does not match");
-  XCTAssertEqualObjects(addressResult.urls, urls, @"URLs do not match");
-  XCTAssertEqualObjects(addressResult.birthday, birthday, @"Birthday does not match");
-  XCTAssertEqualObjects(addressResult.note, note, @"Note does not match");
+  XCTAssertEqualObjects(title, addressResult.title);
+  XCTAssertEqualObjects(names, addressResult.names);
+  XCTAssertEqualObjects(pronunciation, addressResult.pronunciation);
+  XCTAssertEqualObjects(addresses, addressResult.addresses);
+  XCTAssertEqualObjects(emails, addressResult.emails);
+  XCTAssertEqualObjects(phoneNumbers, addressResult.phoneNumbers);
+  XCTAssertEqualObjects(org, addressResult.org);
+  XCTAssertEqualObjects(urls, addressResult.urls);
+  XCTAssertEqualObjects(birthday, addressResult.birthday);
+  XCTAssertEqualObjects(note, addressResult.note);
 }
 
 @end

@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+#import "ZXIntArray.h"
 #import "ZXPDF417BarcodeMetadata.h"
 #import "ZXPDF417BarcodeValue.h"
 #import "ZXPDF417BoundingBox.h"
@@ -22,12 +23,6 @@
 #import "ZXPDF417DetectionResult.h"
 #import "ZXPDF417DetectionResultRowIndicatorColumn.h"
 #import "ZXResultPoint.h"
-
-@interface ZXPDF417DetectionResultRowIndicatorColumn ()
-
-@property (nonatomic, assign) BOOL isLeft;
-
-@end
 
 @implementation ZXPDF417DetectionResultRowIndicatorColumn
 
@@ -89,11 +84,9 @@
       maxRowHeight = MAX(maxRowHeight, currentRowHeight);
       currentRowHeight = 1;
       barcodeRow = codeword.rowNumber;
-    } else if (rowDifference < 0) {
-      self.codewords[codewordsRow] = [NSNull null];
-    } else if (codeword.rowNumber >= barcodeMetadata.rowCount) {
-      self.codewords[codewordsRow] = [NSNull null];
-    } else if (rowDifference > codewordsRow) {
+    } else if (rowDifference < 0 ||
+               codeword.rowNumber >= barcodeMetadata.rowCount ||
+               rowDifference > codewordsRow) {
       self.codewords[codewordsRow] = [NSNull null];
     } else {
       int checkedRows;
@@ -119,23 +112,26 @@
   return (int) (averageRowHeight + 0.5);
 }
 
-- (NSArray *)rowHeights {
+- (BOOL)getRowHeights:(ZXIntArray **)rowHeights {
   ZXPDF417BarcodeMetadata *barcodeMetadata = [self barcodeMetadata];
   if (!barcodeMetadata) {
-    return nil;
+    *rowHeights = nil;
+    return YES;
   }
   [self adjustIncompleteIndicatorColumnRowNumbers:barcodeMetadata];
-  NSMutableArray *result = [NSMutableArray arrayWithCapacity:barcodeMetadata.rowCount];
-  for (int i = 0; i < barcodeMetadata.rowCount; i++) {
-    [result addObject:@0];
-  }
-
+  ZXIntArray *result = [[ZXIntArray alloc] initWithLength:barcodeMetadata.rowCount];
   for (ZXPDF417Codeword *codeword in [self codewords]) {
     if ((id)codeword != [NSNull null]) {
-      result[codeword.rowNumber] = @([result[codeword.rowNumber] intValue] + 1);
-    }
+      int rowNumber = codeword.rowNumber;
+      if (rowNumber >= result.length) {
+        *rowHeights = nil;
+        return NO;
+      }
+      result.array[rowNumber]++;
+    } // else throw exception?
   }
-  return result;
+  *rowHeights = result;
+  return YES;
 }
 
 // TODO maybe we should add missing codewords to store the correct row number to make
@@ -207,19 +203,19 @@
     }
   }
   // Maybe we should check if we have ambiguous values?
-  if (([[barcodeColumnCount value] count] == 0) ||
-      ([[barcodeRowCountUpperPart value] count] == 0) ||
-      ([[barcodeRowCountLowerPart value] count] == 0) ||
-      ([[barcodeECLevel value] count] == 0) ||
-      [[barcodeColumnCount value][0] intValue] < 1 ||
-      [[barcodeRowCountUpperPart value][0] intValue] + [[barcodeRowCountLowerPart value][0] intValue] < ZXPDF417_MIN_ROWS_IN_BARCODE ||
-      [[barcodeRowCountUpperPart value][0] intValue] + [[barcodeRowCountLowerPart value][0] intValue] > ZXPDF417_MAX_ROWS_IN_BARCODE) {
+  if (([barcodeColumnCount value].length == 0) ||
+      ([barcodeRowCountUpperPart value].length == 0) ||
+      ([barcodeRowCountLowerPart value].length == 0) ||
+      ([barcodeECLevel value].length == 0) ||
+      [barcodeColumnCount value].array[0] < 1 ||
+      [barcodeRowCountUpperPart value].array[0] + [barcodeRowCountLowerPart value].array[0] < ZX_PDF417_MIN_ROWS_IN_BARCODE ||
+      [barcodeRowCountUpperPart value].array[0] + [barcodeRowCountLowerPart value].array[0] > ZX_PDF417_MAX_ROWS_IN_BARCODE) {
     return nil;
   }
-  ZXPDF417BarcodeMetadata *barcodeMetadata = [[ZXPDF417BarcodeMetadata alloc] initWithColumnCount:[[barcodeColumnCount value][0] intValue]
-                                                                                rowCountUpperPart:[[barcodeRowCountUpperPart value][0] intValue]
-                                                                                rowCountLowerPart:[[barcodeRowCountLowerPart value][0] intValue]
-                                                                             errorCorrectionLevel:[[barcodeECLevel value][0] intValue]];
+  ZXPDF417BarcodeMetadata *barcodeMetadata = [[ZXPDF417BarcodeMetadata alloc] initWithColumnCount:[barcodeColumnCount value].array[0]
+                                                                                rowCountUpperPart:[barcodeRowCountUpperPart value].array[0]
+                                                                                rowCountLowerPart:[barcodeRowCountLowerPart value].array[0]
+                                                                             errorCorrectionLevel:[barcodeECLevel value].array[0]];
   [self removeIncorrectCodewords:barcodeMetadata];
   return barcodeMetadata;
 }

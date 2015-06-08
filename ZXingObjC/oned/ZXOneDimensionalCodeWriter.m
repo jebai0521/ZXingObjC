@@ -15,6 +15,7 @@
  */
 
 #import "ZXBitMatrix.h"
+#import "ZXBoolArray.h"
 #import "ZXEncodeHints.h"
 #import "ZXOneDimensionalCodeWriter.h"
 
@@ -24,6 +25,13 @@
   return [self encode:contents format:format width:width height:height hints:nil error:error];
 }
 
+/**
+ * Encode the contents following specified format.
+ * width and height are required size. This method may return bigger size
+ * ZXBitMatrix when specified size is too small. The user can set both {width and
+ * height to zero to get minimum size barcode. If negative value is set to width
+ * or height, IllegalArgumentException is thrown.
+ */
 - (ZXBitMatrix *)encode:(NSString *)contents format:(ZXBarcodeFormat)format width:(int)width height:(int)height
                  hints:(ZXEncodeHints *)hints error:(NSError **)error {
   if (contents.length == 0) {
@@ -41,15 +49,15 @@
     sidesMargin = hints.margin.intValue;
   }
 
-  int length;
-  BOOL *code = [self encode:contents length:&length];
-  ZXBitMatrix *result = [self renderResult:code length:length width:width height:height sidesMargin:sidesMargin];
-  free(code);
-  return result;
+  ZXBoolArray *code = [self encode:contents];
+  return [self renderResult:code width:width height:height sidesMargin:sidesMargin];
 }
 
-- (ZXBitMatrix *)renderResult:(BOOL *)code length:(int)length width:(int)width height:(int)height sidesMargin:(int)sidesMargin {
-  int inputWidth = length;
+/**
+ * @return a byte array of horizontal pixels (0 = white, 1 = black)
+ */
+- (ZXBitMatrix *)renderResult:(ZXBoolArray *)code width:(int)width height:(int)height sidesMargin:(int)sidesMargin {
+  int inputWidth = code.length;
   // Add quiet zone on both sides.
   int fullWidth = inputWidth + sidesMargin;
   int outputWidth = MAX(width, fullWidth);
@@ -58,9 +66,9 @@
   int multiple = outputWidth / fullWidth;
   int leftPadding = (outputWidth - (inputWidth * multiple)) / 2;
 
-  ZXBitMatrix *output = [ZXBitMatrix bitMatrixWithWidth:outputWidth height:outputHeight];
+  ZXBitMatrix *output = [[ZXBitMatrix alloc] initWithWidth:outputWidth height:outputHeight];
   for (int inputX = 0, outputX = leftPadding; inputX < inputWidth; inputX++, outputX += multiple) {
-    if (code[inputX]) {
+    if (code.array[inputX]) {
       [output setRegionAtLeft:outputX top:0 width:multiple height:outputHeight];
     }
   }
@@ -69,13 +77,16 @@
 
 /**
  * Appends the given pattern to the target array starting at pos.
+ *
+ * @param startColor starting color - false for white, true for black
+ * @return the number of elements added to target.
  */
-- (int)appendPattern:(BOOL *)target pos:(int)pos pattern:(int *)pattern patternLen:(int)patternLen startColor:(BOOL)startColor {
+- (int)appendPattern:(ZXBoolArray *)target pos:(int)pos pattern:(const int[])pattern patternLen:(int)patternLen startColor:(BOOL)startColor {
   BOOL color = startColor;
   int numAdded = 0;
   for (int i = 0; i < patternLen; i++) {
     for (int j = 0; j < pattern[i]; j++) {
-      target[pos++] = color;
+      target.array[pos++] = color;
     }
     numAdded += pattern[i];
     color = !color; // flip color after each segment
@@ -92,8 +103,10 @@
 /**
  * Encode the contents to boolean array expression of one-dimensional barcode.
  * Start code and end code should be included in result, and side margins should not be included.
+ *
+ * @return a ZXBoolArray of horizontal pixels (false = white, true = black)
  */
-- (BOOL *)encode:(NSString *)contents length:(int *)pLength {
+- (ZXBoolArray *)encode:(NSString *)contents {
   @throw [NSException exceptionWithName:NSInternalInconsistencyException
                                  reason:[NSString stringWithFormat:@"You must override %@ in a subclass", NSStringFromSelector(_cmd)]
                                userInfo:nil];

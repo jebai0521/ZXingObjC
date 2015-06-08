@@ -18,14 +18,7 @@
 #import "ZXPDF417Codeword.h"
 #import "ZXPDF417DetectionResultColumn.h"
 
-int const MAX_NEARBY_DISTANCE = 5;
-
-@interface ZXPDF417DetectionResultColumn ()
-
-@property (nonatomic, strong) ZXPDF417BoundingBox *boundingBox;
-@property (nonatomic, strong) NSMutableArray *codewords;
-
-@end
+const int ZX_PDF417_MAX_NEARBY_DISTANCE = 5;
 
 @implementation ZXPDF417DetectionResultColumn
 
@@ -47,7 +40,7 @@ int const MAX_NEARBY_DISTANCE = 5;
   if (codeword) {
     return codeword;
   }
-  for (int i = 1; i < MAX_NEARBY_DISTANCE; i++) {
+  for (int i = 1; i < ZX_PDF417_MAX_NEARBY_DISTANCE; i++) {
     int nearImageRow = [self imageRowToCodewordIndex:imageRow] - i;
     if (nearImageRow >= 0) {
       codeword = self.codewords[nearImageRow];
@@ -68,10 +61,6 @@ int const MAX_NEARBY_DISTANCE = 5;
 
 - (int)imageRowToCodewordIndex:(int)imageRow {
   return imageRow - self.boundingBox.minY;
-}
-
-- (int)codewordIndexToImageRow:(int)codewordIndex {
-  return self.boundingBox.minY + codewordIndex;
 }
 
 - (void)setCodeword:(int)imageRow codeword:(ZXPDF417Codeword *)codeword {

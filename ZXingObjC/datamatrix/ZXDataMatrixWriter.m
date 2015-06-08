@@ -16,14 +16,13 @@
 
 #import "ZXBitMatrix.h"
 #import "ZXByteMatrix.h"
+#import "ZXDataMatrixDefaultPlacement.h"
 #import "ZXDataMatrixErrorCorrection.h"
+#import "ZXDataMatrixHighLevelEncoder.h"
+#import "ZXDataMatrixSymbolInfo.h"
 #import "ZXDataMatrixWriter.h"
-#import "ZXDefaultPlacement.h"
 #import "ZXDimension.h"
 #import "ZXEncodeHints.h"
-#import "ZXHighLevelEncoder.h"
-#import "ZXSymbolInfo.h"
-#import "ZXSymbolShapeHint.h"
 
 @implementation ZXDataMatrixWriter
 
@@ -46,44 +45,51 @@
   }
 
   // Try to get force shape & min / max size
-  ZXSymbolShapeHint *shape = [ZXSymbolShapeHint forceNone];
-  ZXDimension *minSize = nil;
+  ZXDataMatrixSymbolShapeHint shape = ZXDataMatrixSymbolShapeHintForceNone;
+  ZXDimension *minSize = [[ZXDimension alloc] initWithWidth:width height:height];
   ZXDimension *maxSize = nil;
   if (hints != nil) {
-    ZXSymbolShapeHint *requestedShape = hints.dataMatrixShape;
-    if (requestedShape != nil) {
-      shape = requestedShape;
-    }
+    shape = hints.dataMatrixShape;
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wdeprecated-declarations"
     ZXDimension *requestedMinSize = hints.minSize;
+#pragma GCC diagnostic pop
     if (requestedMinSize != nil) {
       minSize = requestedMinSize;
     }
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wdeprecated-declarations"
     ZXDimension *requestedMaxSize = hints.maxSize;
+#pragma GCC diagnostic pop
     if (requestedMaxSize != nil) {
       maxSize = requestedMaxSize;
     }
   }
 
   //1. step: Data encodation
-  NSString *encoded = [ZXHighLevelEncoder encodeHighLevel:contents shape:shape minSize:minSize maxSize:maxSize];
+  NSString *encoded = [ZXDataMatrixHighLevelEncoder encodeHighLevel:contents shape:shape minSize:minSize maxSize:maxSize];
 
-  ZXSymbolInfo *symbolInfo = [ZXSymbolInfo lookup:(int)encoded.length shape:shape minSize:minSize maxSize:maxSize fail:YES];
+  ZXDataMatrixSymbolInfo *symbolInfo = [ZXDataMatrixSymbolInfo lookup:(int)encoded.length shape:shape minSize:minSize maxSize:maxSize fail:YES];
 
   //2. step: ECC generation
   NSString *codewords = [ZXDataMatrixErrorCorrection encodeECC200:encoded symbolInfo:symbolInfo];
 
   //3. step: Module placement in Matrix
-  ZXDefaultPlacement *placement = [[ZXDefaultPlacement alloc] initWithCodewords:codewords numcols:symbolInfo.symbolDataWidth numrows:symbolInfo.symbolDataHeight];
+  ZXDataMatrixDefaultPlacement *placement = [[ZXDataMatrixDefaultPlacement alloc] initWithCodewords:codewords numcols:symbolInfo.symbolDataWidth numrows:symbolInfo.symbolDataHeight];
   [placement place];
 
   //4. step: low-level encoding
-  return [self encodeLowLevel:placement symbolInfo:symbolInfo];
+  return [self encodeLowLevel:placement symbolInfo:symbolInfo width:width height:height];
 }
 
 /**
  * Encode the given symbol info to a bit matrix.
+ *
+ * @param placement  The DataMatrix placement.
+ * @param symbolInfo The symbol info to encode.
+ * @return The bit matrix generated.
  */
-- (ZXBitMatrix *)encodeLowLevel:(ZXDefaultPlacement *)placement symbolInfo:(ZXSymbolInfo *)symbolInfo {
+- (ZXBitMatrix *)encodeLowLevel:(ZXDataMatrixDefaultPlacement *)placement symbolInfo:(ZXDataMatrixSymbolInfo *)symbolInfo width:(int)width height:(int)height {
   int symbolWidth = symbolInfo.symbolDataWidth;
   int symbolHeight = symbolInfo.symbolDataHeight;
 
@@ -129,27 +135,34 @@
     }
   }
 
-  return [self convertByteMatrixToBitMatrix:matrix];
+  return [self convertByteMatrixToBitMatrix:matrix width:width height:height];
 }
 
 /**
- * Convert the ByteMatrix to BitMatrix.
+ * Convert the ZXByteMatrix to ZXBitMatrix.
+ *
+ * @param matrix The input matrix.
+ * @return The output matrix.
  */
-- (ZXBitMatrix *)convertByteMatrixToBitMatrix:(ZXByteMatrix *)matrix {
-  int matrixWidgth = matrix.width;
-  int matrixHeight = matrix.height;
+- (ZXBitMatrix *)convertByteMatrixToBitMatrix:(ZXByteMatrix *)input width:(int)width height:(int)height {
+  int inputWidth = input.width;
+  int inputHeight = input.height;
+  int outputWidth = MAX(width, inputWidth);
+  int outputHeight = MAX(height, inputHeight);
 
-  ZXBitMatrix *output = [[ZXBitMatrix alloc] initWithWidth:matrixWidgth height:matrixHeight];
-  [output clear];
-  for (int i = 0; i < matrixWidgth; i++) {
-    for (int j = 0; j < matrixHeight; j++) {
-      // Zero is white in the bytematrix
-      if ([matrix getX:i y:j] == 1) {
-        [output setX:i y:j];
+  int multiple = MIN(outputWidth / inputWidth, outputHeight / inputHeight);
+  int leftPadding = (outputWidth - (inputWidth * multiple)) / 2;
+  int topPadding = (outputHeight - (inputHeight * multiple)) / 2;
+
+  ZXBitMatrix *output = [[ZXBitMatrix alloc] initWithWidth:outputWidth height:outputHeight];
+
+  for (int inputY = 0, outputY = topPadding; inputY < inputHeight; inputY++, outputY += multiple) {
+    for (int inputX = 0, outputX = leftPadding; inputX < inputWidth; inputX++, outputX += multiple) {
+      if ([input getX:inputX y:inputY] == 1) {
+        [output setRegionAtLeft:outputX top:outputY width:multiple height:multiple];
       }
     }
   }
-
   return output;
 }
 

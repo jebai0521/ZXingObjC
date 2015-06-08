@@ -14,18 +14,27 @@
  * limitations under the License.
  */
 
+#import "ZXDataMatrixDecodedBitStreamParser.h"
 #import "ZXDataMatrixDecodedBitStreamParserTestCase.h"
 
 @implementation ZXDataMatrixDecodedBitStreamParserTestCase
 
 - (void)testAsciiStandardDecode {
   // ASCII characters 0-127 are encoded as the value + 1
-  int8_t bytes[6] = {
+  ZXByteArray *bytes = [[ZXByteArray alloc] initWithBytes:
     (int8_t) ('a' + 1), (int8_t) ('b' + 1), (int8_t) ('c' + 1),
-    (int8_t) ('A' + 1), (int8_t) ('B' + 1), (int8_t) ('C' + 1) };
-  NSString *decodedString = [ZXDataMatrixDecodedBitStreamParser decode:bytes length:6 error:nil].text;
-  NSString *expected = @"abcABC";
-  XCTAssertEqualObjects(decodedString, expected, @"Expected \"%@\" to equal \"%@\"", decodedString, expected);
+    (int8_t) ('A' + 1), (int8_t) ('B' + 1), (int8_t) ('C' + 1), -1];
+  NSString *decodedString = [ZXDataMatrixDecodedBitStreamParser decode:bytes error:nil].text;
+  XCTAssertEqualObjects(@"abcABC", decodedString);
+}
+
+- (void)testAsciiDoubleDigitDecode {
+  // ASCII double digit (00 - 99) Numeric Value + 130
+  ZXByteArray *bytes = [[ZXByteArray alloc] initWithBytes:
+    (int8_t)       130 , (int8_t) ( 1 + 130),
+    (int8_t) (98 + 130), (int8_t) (99 + 130), -1];
+  NSString *decodedString = [ZXDataMatrixDecodedBitStreamParser decode:bytes error:nil].text;
+  XCTAssertEqualObjects(@"00019899", decodedString);
 }
 
 @end

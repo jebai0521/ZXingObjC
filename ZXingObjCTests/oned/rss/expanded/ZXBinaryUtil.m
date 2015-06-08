@@ -18,9 +18,6 @@
 
 @implementation ZXBinaryUtil
 
-/*
- * Constructs a BitArray from a String like the one returned from BitArray.toString()
- */
 + (ZXBitArray *)buildBitArrayFromString:(NSString *)data {
   NSString *dotsAndXs = [[data stringByReplacingOccurrencesOfString:@"1" withString:@"X"]
                          stringByReplacingOccurrencesOfString:@"0" withString:@"."];
@@ -28,8 +25,8 @@
   int counter = 0;
 
   for (int i = 0; i < dotsAndXs.length; ++i){
-    if(i % 9 == 0) { // spaces
-      if([dotsAndXs characterAtIndex:i] != ' ') {
+    if (i % 9 == 0) { // spaces
+      if ([dotsAndXs characterAtIndex:i] != ' ') {
         @throw [NSException exceptionWithName:@"IllegalStateException" reason:@"space expected" userInfo:nil];
       }
       continue;

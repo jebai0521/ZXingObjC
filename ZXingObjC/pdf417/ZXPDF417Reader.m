@@ -34,6 +34,10 @@
 
 /**
  * Locates and decodes a PDF417 code in an image.
+ *
+ * @return a String representing the content encoded by the PDF417 code
+ * @return nil if a PDF417 code cannot be found,
+ * @return nil if a PDF417 cannot be decoded
  */
 - (ZXResult *)decode:(ZXBinaryBitmap *)image error:(NSError **)error {
   return [self decode:image hints:nil error:error];
@@ -42,7 +46,7 @@
 - (ZXResult *)decode:(ZXBinaryBitmap *)image hints:(ZXDecodeHints *)hints error:(NSError **)error {
   NSArray *result = [self decode:image hints:hints multiple:NO error:error];
   if (!result || result.count == 0 || !result[0]) {
-    if (error) *error = NotFoundErrorInstance();
+    if (error) *error = ZXNotFoundErrorInstance();
     return nil;
   }
   return result[0];
@@ -74,12 +78,15 @@
                                                        imageTopRight:imageTopRight
                                                     imageBottomRight:imageBottomRight
                                                     minCodewordWidth:[self minCodewordWidth:points]
-                                                    maxCodewordWidth:[self maxCodewordWidth:points]];
+                                                    maxCodewordWidth:[self maxCodewordWidth:points]
+                                                               error:error];
     if (!decoderResult) {
       return nil;
     }
-    ZXResult *result = [[ZXResult alloc] initWithText:decoderResult.text rawBytes:decoderResult.rawBytes
-                                               length:decoderResult.length resultPoints:points format:kBarcodeFormatPDF417];
+    ZXResult *result = [[ZXResult alloc] initWithText:decoderResult.text
+                                             rawBytes:decoderResult.rawBytes
+                                               resultPoints:points
+                                               format:kBarcodeFormatPDF417];
     [result putMetadata:kResultMetadataTypeErrorCorrectionLevel value:decoderResult.ecLevel];
     ZXPDF417ResultMetadata *pdf417ResultMetadata = decoderResult.other;
     if (pdf417ResultMetadata) {
@@ -94,30 +101,30 @@
   if (!p1 || !p2 || (id)p1 == [NSNull null] || p2 == (id)[NSNull null]) {
     return 0;
   }
-  return abs(p1.x - p2.x);
+  return fabsf(p1.x - p2.x);
 }
 
 - (int)minWidth:(ZXResultPoint *)p1 p2:(ZXResultPoint *)p2 {
   if (!p1 || !p2 || (id)p1 == [NSNull null] || p2 == (id)[NSNull null]) {
     return INT_MAX;
   }
-  return abs(p1.x - p2.x);
+  return fabsf(p1.x - p2.x);
 }
 
 - (int)maxCodewordWidth:(NSArray *)p {
   return MAX(
-             MAX([self maxWidth:p[0] p2:p[4]], [self maxWidth:p[6] p2:p[2]] * ZXPDF417_MODULES_IN_CODEWORD /
-                 ZXPDF417_MODULES_IN_STOP_PATTERN),
-             MAX([self maxWidth:p[1] p2:p[5]], [self maxWidth:p[7] p2:p[3]] * ZXPDF417_MODULES_IN_CODEWORD /
-                 ZXPDF417_MODULES_IN_STOP_PATTERN));
+             MAX([self maxWidth:p[0] p2:p[4]], [self maxWidth:p[6] p2:p[2]] * ZX_PDF417_MODULES_IN_CODEWORD /
+                 ZX_PDF417_MODULES_IN_STOP_PATTERN),
+             MAX([self maxWidth:p[1] p2:p[5]], [self maxWidth:p[7] p2:p[3]] * ZX_PDF417_MODULES_IN_CODEWORD /
+                 ZX_PDF417_MODULES_IN_STOP_PATTERN));
 }
 
 - (int)minCodewordWidth:(NSArray *)p {
   return MIN(
-             MIN([self minWidth:p[0] p2:p[4]], [self minWidth:p[6] p2:p[2]] * ZXPDF417_MODULES_IN_CODEWORD /
-                 ZXPDF417_MODULES_IN_STOP_PATTERN),
-             MIN([self minWidth:p[1] p2:p[5]], [self minWidth:p[7] p2:p[3]] * ZXPDF417_MODULES_IN_CODEWORD /
-                 ZXPDF417_MODULES_IN_STOP_PATTERN));
+             MIN([self minWidth:p[0] p2:p[4]], [self minWidth:p[6] p2:p[2]] * ZX_PDF417_MODULES_IN_CODEWORD /
+                 ZX_PDF417_MODULES_IN_STOP_PATTERN),
+             MIN([self minWidth:p[1] p2:p[5]], [self minWidth:p[7] p2:p[3]] * ZX_PDF417_MODULES_IN_CODEWORD /
+                 ZX_PDF417_MODULES_IN_STOP_PATTERN));
 }
 
 - (void)reset {

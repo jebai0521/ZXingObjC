@@ -14,14 +14,15 @@
  * limitations under the License.
  */
 
+#import "ZXBoolArray.h"
 #import "ZXCode128Reader.h"
 #import "ZXCode128Writer.h"
 
 // Dummy characters used to specify control characters in input
-const unichar ESCAPE_FNC_1 = L'\u00f1';
-const unichar ESCAPE_FNC_2 = L'\u00f2';
-const unichar ESCAPE_FNC_3 = L'\u00f3';
-const unichar ESCAPE_FNC_4 = L'\u00f4';
+const unichar ZX_CODE128_ESCAPE_FNC_1 = L'\u00f1';
+const unichar ZX_CODE128_ESCAPE_FNC_2 = L'\u00f2';
+const unichar ZX_CODE128_ESCAPE_FNC_3 = L'\u00f3';
+const unichar ZX_CODE128_ESCAPE_FNC_4 = L'\u00f4';
 
 @implementation ZXCode128Writer
 
@@ -32,7 +33,7 @@ const unichar ESCAPE_FNC_4 = L'\u00f4';
   return [super encode:contents format:format width:width height:height hints:hints error:error];
 }
 
-- (BOOL *)encode:(NSString *)contents length:(int *)pLength {
+- (ZXBoolArray *)encode:(NSString *)contents {
   int length = (int)[contents length];
   // Check length
   if (length < 1 || length > 80) {
@@ -43,10 +44,10 @@ const unichar ESCAPE_FNC_4 = L'\u00f4';
     unichar c = [contents characterAtIndex:i];
     if (c < ' ' || c > '~') {
       switch (c) {
-        case ESCAPE_FNC_1:
-        case ESCAPE_FNC_2:
-        case ESCAPE_FNC_3:
-        case ESCAPE_FNC_4:
+        case ZX_CODE128_ESCAPE_FNC_1:
+        case ZX_CODE128_ESCAPE_FNC_2:
+        case ZX_CODE128_ESCAPE_FNC_3:
+        case ZX_CODE128_ESCAPE_FNC_4:
           break;
         default:
           [NSException raise:NSInvalidArgumentException format:@"Bad character in input: %C", c];
@@ -62,55 +63,52 @@ const unichar ESCAPE_FNC_4 = L'\u00f4';
 
   while (position < length) {
     //Select code to use
-    int requiredDigitCount = codeSet == CODE_CODE_C ? 2 : 4;
+    int requiredDigitCount = codeSet == ZX_CODE128_CODE_CODE_C ? 2 : 4;
     int newCodeSet;
     if ([self isDigits:contents start:position length:requiredDigitCount]) {
-      newCodeSet = CODE_CODE_C;
+      newCodeSet = ZX_CODE128_CODE_CODE_C;
     } else {
-      newCodeSet = CODE_CODE_B;
+      newCodeSet = ZX_CODE128_CODE_CODE_B;
     }
 
     //Get the pattern index
     int patternIndex;
     if (newCodeSet == codeSet) {
       // Encode the current character
-      if (codeSet == CODE_CODE_B) {
-        patternIndex = [contents characterAtIndex:position] - ' ';
-        position += 1;
-      } else { // CODE_CODE_C
-        switch ([contents characterAtIndex:position]) {
-          case ESCAPE_FNC_1:
-            patternIndex = CODE_FNC_1;
-            position++;
-            break;
-          case ESCAPE_FNC_2:
-            patternIndex = CODE_FNC_2;
-            position++;
-            break;
-          case ESCAPE_FNC_3:
-            patternIndex = CODE_FNC_3;
-            position++;
-            break;
-          case ESCAPE_FNC_4:
-            patternIndex = CODE_FNC_4_B; // FIXME if this ever outputs Code A
-            position++;
-            break;
-          default:
+      // First handle escapes
+      switch ([contents characterAtIndex:position]) {
+        case ZX_CODE128_ESCAPE_FNC_1:
+          patternIndex = ZX_CODE128_CODE_FNC_1;
+          break;
+        case ZX_CODE128_ESCAPE_FNC_2:
+          patternIndex = ZX_CODE128_CODE_FNC_2;
+          break;
+        case ZX_CODE128_ESCAPE_FNC_3:
+          patternIndex = ZX_CODE128_CODE_FNC_3;
+          break;
+        case ZX_CODE128_ESCAPE_FNC_4:
+          patternIndex = ZX_CODE128_CODE_FNC_4_B; // FIXME if this ever outputs Code A
+          break;
+        default:
+          // Then handle normal characters otherwise
+          if (codeSet == ZX_CODE128_CODE_CODE_B) {
+            patternIndex = [contents characterAtIndex:position] - ' ';
+          } else { // CODE_CODE_C
             patternIndex = [[contents substringWithRange:NSMakeRange(position, 2)] intValue];
-            position += 2;
-            break;
-        }
+            position++; // Also incremented below
+          }
       }
+      position++;
     } else {
       // Should we change the current code?
       // Do we have a code set?
       if (codeSet == 0) {
         // No, we don't have a code set
-        if (newCodeSet == CODE_CODE_B) {
-          patternIndex = CODE_START_B;
+        if (newCodeSet == ZX_CODE128_CODE_CODE_B) {
+          patternIndex = ZX_CODE128_CODE_START_B;
         } else {
           // CODE_CODE_C
-          patternIndex = CODE_START_C;
+          patternIndex = ZX_CODE128_CODE_START_C;
         }
       } else {
         // Yes, we have a code set
@@ -121,8 +119,8 @@ const unichar ESCAPE_FNC_4 = L'\u00f4';
 
     // Get the pattern
     NSMutableArray *pattern = [NSMutableArray array];
-    for (int i = 0; i < sizeof(CODE_PATTERNS[patternIndex]) / sizeof(int); i++) {
-      [pattern addObject:@(CODE_PATTERNS[patternIndex][i])];
+    for (int i = 0; i < sizeof(ZX_CODE128_CODE_PATTERNS[patternIndex]) / sizeof(int); i++) {
+      [pattern addObject:@(ZX_CODE128_CODE_PATTERNS[patternIndex][i])];
     }
     [patterns addObject:pattern];
 
@@ -136,15 +134,15 @@ const unichar ESCAPE_FNC_4 = L'\u00f4';
   // Compute and append checksum
   checkSum %= 103;
   NSMutableArray *pattern = [NSMutableArray array];
-  for (int i = 0; i < sizeof(CODE_PATTERNS[checkSum]) / sizeof(int); i++) {
-    [pattern addObject:@(CODE_PATTERNS[checkSum][i])];
+  for (int i = 0; i < sizeof(ZX_CODE128_CODE_PATTERNS[checkSum]) / sizeof(int); i++) {
+    [pattern addObject:@(ZX_CODE128_CODE_PATTERNS[checkSum][i])];
   }
   [patterns addObject:pattern];
 
   // Append stop code
   pattern = [NSMutableArray array];
-  for (int i = 0; i < sizeof(CODE_PATTERNS[CODE_STOP]) / sizeof(int); i++) {
-    [pattern addObject:@(CODE_PATTERNS[CODE_STOP][i])];
+  for (int i = 0; i < sizeof(ZX_CODE128_CODE_PATTERNS[ZX_CODE128_CODE_STOP]) / sizeof(int); i++) {
+    [pattern addObject:@(ZX_CODE128_CODE_PATTERNS[ZX_CODE128_CODE_STOP][i])];
   }
   [patterns addObject:pattern];
 
@@ -157,17 +155,16 @@ const unichar ESCAPE_FNC_4 = L'\u00f4';
   }
 
   // Compute result
-  if (pLength) *pLength = codeWidth;
-  BOOL *result = (BOOL *)malloc(codeWidth * sizeof(BOOL));
+  ZXBoolArray *result = [[ZXBoolArray alloc] initWithLength:codeWidth];
   int pos = 0;
   for (NSArray *patternArray in patterns) {
     int patternLen = (int)[patternArray count];
     int pattern[patternLen];
-    for(int i = 0; i < patternLen; i++) {
+    for (int i = 0; i < patternLen; i++) {
       pattern[i] = [patternArray[i] intValue];
     }
 
-    pos += [super appendPattern:result pos:pos pattern:pattern patternLen:patternLen startColor:TRUE];
+    pos += [self appendPattern:result pos:pos pattern:pattern patternLen:patternLen startColor:YES];
   }
 
   return result;
@@ -179,7 +176,7 @@ const unichar ESCAPE_FNC_4 = L'\u00f4';
   for (int i = start; i < end && i < last; i++) {
     unichar c = [value characterAtIndex:i];
     if (c < '0' || c > '9') {
-      if (c != ESCAPE_FNC_1) {
+      if (c != ZX_CODE128_ESCAPE_FNC_1) {
         return NO;
       }
       end++; // ignore FNC_1

@@ -18,24 +18,25 @@
 #import "ZXBarcodeFormat.h"
 #import "ZXDecodeHints.h"
 #import "ZXErrors.h"
-#import "ZXPair.h"
+#import "ZXIntArray.h"
 #import "ZXResult.h"
 #import "ZXResultPointCallback.h"
 #import "ZXRSS14Reader.h"
 #import "ZXRSSFinderPattern.h"
+#import "ZXRSSPair.h"
 #import "ZXRSSUtils.h"
 
-const int OUTSIDE_EVEN_TOTAL_SUBSET[5] = {1,10,34,70,126};
-const int INSIDE_ODD_TOTAL_SUBSET[4] = {4,20,48,81};
-const int OUTSIDE_GSUM[5] = {0,161,961,2015,2715};
-const int INSIDE_GSUM[4] = {0,336,1036,1516};
-const int OUTSIDE_ODD_WIDEST[5] = {8,6,4,3,1};
-const int INSIDE_ODD_WIDEST[4] = {2,4,6,8};
+const int ZX_RSS14_OUTSIDE_EVEN_TOTAL_SUBSET[5] = {1,10,34,70,126};
+const int ZX_RSS14_INSIDE_ODD_TOTAL_SUBSET[4] = {4,20,48,81};
+const int ZX_RSS14_OUTSIDE_GSUM[5] = {0,161,961,2015,2715};
+const int ZX_RSS14_INSIDE_GSUM[4] = {0,336,1036,1516};
+const int ZX_RSS14_OUTSIDE_ODD_WIDEST[5] = {8,6,4,3,1};
+const int ZX_RSS14_INSIDE_ODD_WIDEST[4] = {2,4,6,8};
 
 @interface ZXRSS14Reader ()
 
-@property (nonatomic, strong) NSMutableArray *possibleLeftPairs;
-@property (nonatomic, strong) NSMutableArray *possibleRightPairs;
+@property (nonatomic, strong, readonly) NSMutableArray *possibleLeftPairs;
+@property (nonatomic, strong, readonly) NSMutableArray *possibleRightPairs;
 
 @end
 
@@ -51,16 +52,16 @@ const int INSIDE_ODD_WIDEST[4] = {2,4,6,8};
 }
 
 - (ZXResult *)decodeRow:(int)rowNumber row:(ZXBitArray *)row hints:(ZXDecodeHints *)hints error:(NSError **)error {
-  ZXPair *leftPair = [self decodePair:row right:NO rowNumber:rowNumber hints:hints];
+  ZXRSSPair *leftPair = [self decodePair:row right:NO rowNumber:rowNumber hints:hints];
   [self addOrTally:self.possibleLeftPairs pair:leftPair];
   [row reverse];
-  ZXPair *rightPair = [self decodePair:row right:YES rowNumber:rowNumber hints:hints];
+  ZXRSSPair *rightPair = [self decodePair:row right:YES rowNumber:rowNumber hints:hints];
   [self addOrTally:self.possibleRightPairs pair:rightPair];
   [row reverse];
 
-  for (ZXPair *left in self.possibleLeftPairs) {
+  for (ZXRSSPair *left in self.possibleLeftPairs) {
     if ([left count] > 1) {
-      for (ZXPair *right in self.possibleRightPairs) {
+      for (ZXRSSPair *right in self.possibleRightPairs) {
         if ([right count] > 1) {
           if ([self checkChecksum:left rightPair:right]) {
             return [self constructResult:left rightPair:right];
@@ -70,16 +71,16 @@ const int INSIDE_ODD_WIDEST[4] = {2,4,6,8};
     }
   }
 
-  if (error) *error = NotFoundErrorInstance();
+  if (error) *error = ZXNotFoundErrorInstance();
   return nil;
 }
 
-- (void)addOrTally:(NSMutableArray *)possiblePairs pair:(ZXPair *)pair {
+- (void)addOrTally:(NSMutableArray *)possiblePairs pair:(ZXRSSPair *)pair {
   if (pair == nil) {
     return;
   }
   BOOL found = NO;
-  for (ZXPair *other in possiblePairs) {
+  for (ZXRSSPair *other in possiblePairs) {
     if (other.value == pair.value) {
       [other incrementCount];
       found = YES;
@@ -97,7 +98,7 @@ const int INSIDE_ODD_WIDEST[4] = {2,4,6,8};
   [self.possibleRightPairs removeAllObjects];
 }
 
-- (ZXResult *)constructResult:(ZXPair *)leftPair rightPair:(ZXPair *)rightPair {
+- (ZXResult *)constructResult:(ZXRSSPair *)leftPair rightPair:(ZXRSSPair *)rightPair {
   long long symbolValue = 4537077LL * leftPair.value + rightPair.value;
   NSString *text = [@(symbolValue) stringValue];
   NSMutableString *buffer = [NSMutableString stringWithCapacity:14];
@@ -122,13 +123,12 @@ const int INSIDE_ODD_WIDEST[4] = {2,4,6,8};
   NSArray *leftPoints = [[leftPair finderPattern] resultPoints];
   NSArray *rightPoints = [[rightPair finderPattern] resultPoints];
   return [ZXResult resultWithText:buffer
-                         rawBytes:NULL
-                           length:0
+                         rawBytes:nil
                      resultPoints:@[leftPoints[0], leftPoints[1], rightPoints[0], rightPoints[1]]
                            format:kBarcodeFormatRSS14];
 }
 
-- (BOOL)checkChecksum:(ZXPair *)leftPair rightPair:(ZXPair *)rightPair {
+- (BOOL)checkChecksum:(ZXRSSPair *)leftPair rightPair:(ZXRSSPair *)rightPair {
 //  int leftFPValue = leftPair.finderPattern.value;
 //  int rightFPValue = rightPair.finderPattern.value;
 //  if ((leftFPValue == 0 && rightFPValue == 8) || (leftFPValue == 8 && rightFPValue == 0)) {
@@ -144,8 +144,8 @@ const int INSIDE_ODD_WIDEST[4] = {2,4,6,8};
   return checkValue == targetCheckValue;
 }
 
-- (ZXPair *)decodePair:(ZXBitArray *)row right:(BOOL)right rowNumber:(int)rowNumber hints:(ZXDecodeHints *)hints {
-  NSArray *startEnd = [self findFinderPattern:row rowOffset:0 rightFinderPattern:right];
+- (ZXRSSPair *)decodePair:(ZXBitArray *)row right:(BOOL)right rowNumber:(int)rowNumber hints:(ZXDecodeHints *)hints {
+  ZXIntArray *startEnd = [self findFinderPattern:row rowOffset:0 rightFinderPattern:right];
   if (!startEnd) {
     return nil;
   }
@@ -155,67 +155,60 @@ const int INSIDE_ODD_WIDEST[4] = {2,4,6,8};
   }
   id<ZXResultPointCallback> resultPointCallback = hints == nil ? nil : hints.resultPointCallback;
   if (resultPointCallback != nil) {
-    float center = ([startEnd[0] intValue] + [startEnd[1] intValue]) / 2.0f;
+    float center = (startEnd.array[0] + startEnd.array[1]) / 2.0f;
     if (right) {
       center = [row size] - 1 - center;
     }
     [resultPointCallback foundPossibleResultPoint:[[ZXResultPoint alloc] initWithX:center y:rowNumber]];
   }
-  ZXDataCharacter *outside = [self decodeDataCharacter:row pattern:pattern outsideChar:YES];
-  ZXDataCharacter *inside = [self decodeDataCharacter:row pattern:pattern outsideChar:NO];
+  ZXRSSDataCharacter *outside = [self decodeDataCharacter:row pattern:pattern outsideChar:YES];
+  ZXRSSDataCharacter *inside = [self decodeDataCharacter:row pattern:pattern outsideChar:NO];
   if (!outside || !inside) {
     return nil;
   }
-  return [[ZXPair alloc] initWithValue:1597 * outside.value + inside.value
+  return [[ZXRSSPair alloc] initWithValue:1597 * outside.value + inside.value
                         checksumPortion:outside.checksumPortion + 4 * inside.checksumPortion
                           finderPattern:pattern];
 }
 
-- (ZXDataCharacter *)decodeDataCharacter:(ZXBitArray *)row pattern:(ZXRSSFinderPattern *)pattern outsideChar:(BOOL)outsideChar {
-  int countersLen = self.dataCharacterCountersLen;
-  int *counters = self.dataCharacterCounters;
-  counters[0] = 0;
-  counters[1] = 0;
-  counters[2] = 0;
-  counters[3] = 0;
-  counters[4] = 0;
-  counters[5] = 0;
-  counters[6] = 0;
-  counters[7] = 0;
+- (ZXRSSDataCharacter *)decodeDataCharacter:(ZXBitArray *)row pattern:(ZXRSSFinderPattern *)pattern outsideChar:(BOOL)outsideChar {
+  ZXIntArray *counters = self.dataCharacterCounters;
+  [counters clear];
+  int32_t *array = counters.array;
 
   if (outsideChar) {
-    if (![ZXOneDReader recordPatternInReverse:row start:[[pattern startEnd][0] intValue] counters:counters countersSize:countersLen]) {
+    if (![ZXOneDReader recordPatternInReverse:row start:[pattern startEnd].array[0] counters:counters]) {
       return nil;
     }
   } else {
-    if (![ZXOneDReader recordPattern:row start:[[pattern startEnd][1] intValue] counters:counters countersSize:countersLen]) {
+    if (![ZXOneDReader recordPattern:row start:[pattern startEnd].array[1] counters:counters]) {
       return nil;
     }
 
-    for (int i = 0, j = countersLen - 1; i < j; i++, j--) {
-      int temp = counters[i];
-      counters[i] = counters[j];
-      counters[j] = temp;
+    for (int i = 0, j = counters.length - 1; i < j; i++, j--) {
+      int temp = array[i];
+      array[i] = array[j];
+      array[j] = temp;
     }
   }
 
   int numModules = outsideChar ? 16 : 15;
-  float elementWidth = (float)[ZXAbstractRSSReader count:counters arrayLen:countersLen] / (float)numModules;
+  float elementWidth = (float)[ZXAbstractRSSReader count:counters] / (float)numModules;
 
-  for (int i = 0; i < countersLen; i++) {
-    float value = (float) counters[i] / elementWidth;
+  for (int i = 0; i < counters.length; i++) {
+    float value = (float) array[i] / elementWidth;
     int count = (int)(value + 0.5f);
     if (count < 1) {
       count = 1;
     } else if (count > 8) {
       count = 8;
     }
-    int offset = i >> 1;
+    int offset = i / 2;
     if ((i & 0x01) == 0) {
-      self.oddCounts[offset] = count;
+      self.oddCounts.array[offset] = count;
       self.oddRoundingErrors[offset] = value - count;
     } else {
-      self.evenCounts[offset] = count;
+      self.evenCounts.array[offset] = count;
       self.evenRoundingErrors[offset] = value - count;
     }
   }
@@ -226,17 +219,17 @@ const int INSIDE_ODD_WIDEST[4] = {2,4,6,8};
 
   int oddSum = 0;
   int oddChecksumPortion = 0;
-  for (int i = self.oddCountsLen - 1; i >= 0; i--) {
+  for (int i = self.oddCounts.length - 1; i >= 0; i--) {
     oddChecksumPortion *= 9;
-    oddChecksumPortion += self.oddCounts[i];
-    oddSum += self.oddCounts[i];
+    oddChecksumPortion += self.oddCounts.array[i];
+    oddSum += self.oddCounts.array[i];
   }
   int evenChecksumPortion = 0;
   int evenSum = 0;
-  for (int i = self.evenCountsLen - 1; i >= 0; i--) {
+  for (int i = self.evenCounts.length - 1; i >= 0; i--) {
     evenChecksumPortion *= 9;
-    evenChecksumPortion += self.evenCounts[i];
-    evenSum += self.evenCounts[i];
+    evenChecksumPortion += self.evenCounts.array[i];
+    evenSum += self.evenCounts.array[i];
   }
   int checksumPortion = oddChecksumPortion + 3 * evenChecksumPortion;
 
@@ -245,35 +238,32 @@ const int INSIDE_ODD_WIDEST[4] = {2,4,6,8};
       return nil;
     }
     int group = (12 - oddSum) / 2;
-    int oddWidest = OUTSIDE_ODD_WIDEST[group];
+    int oddWidest = ZX_RSS14_OUTSIDE_ODD_WIDEST[group];
     int evenWidest = 9 - oddWidest;
-    int vOdd = [ZXRSSUtils rssValue:self.oddCounts widthsLen:self.oddCountsLen maxWidth:oddWidest noNarrow:NO];
-    int vEven = [ZXRSSUtils rssValue:self.evenCounts widthsLen:self.evenCountsLen maxWidth:evenWidest noNarrow:YES];
-    int tEven = OUTSIDE_EVEN_TOTAL_SUBSET[group];
-    int gSum = OUTSIDE_GSUM[group];
-    return [[ZXDataCharacter alloc] initWithValue:vOdd * tEven + vEven + gSum checksumPortion:checksumPortion];
+    int vOdd = [ZXRSSUtils rssValue:self.oddCounts maxWidth:oddWidest noNarrow:NO];
+    int vEven = [ZXRSSUtils rssValue:self.evenCounts maxWidth:evenWidest noNarrow:YES];
+    int tEven = ZX_RSS14_OUTSIDE_EVEN_TOTAL_SUBSET[group];
+    int gSum = ZX_RSS14_OUTSIDE_GSUM[group];
+    return [[ZXRSSDataCharacter alloc] initWithValue:vOdd * tEven + vEven + gSum checksumPortion:checksumPortion];
   } else {
     if ((evenSum & 0x01) != 0 || evenSum > 10 || evenSum < 4) {
       return nil;
     }
     int group = (10 - evenSum) / 2;
-    int oddWidest = INSIDE_ODD_WIDEST[group];
+    int oddWidest = ZX_RSS14_INSIDE_ODD_WIDEST[group];
     int evenWidest = 9 - oddWidest;
-    int vOdd = [ZXRSSUtils rssValue:self.oddCounts widthsLen:self.oddCountsLen maxWidth:oddWidest noNarrow:YES];
-    int vEven = [ZXRSSUtils rssValue:self.evenCounts widthsLen:self.evenCountsLen maxWidth:evenWidest noNarrow:NO];
-    int tOdd = INSIDE_ODD_TOTAL_SUBSET[group];
-    int gSum = INSIDE_GSUM[group];
-    return [[ZXDataCharacter alloc] initWithValue:vEven * tOdd + vOdd + gSum checksumPortion:checksumPortion];
+    int vOdd = [ZXRSSUtils rssValue:self.oddCounts maxWidth:oddWidest noNarrow:YES];
+    int vEven = [ZXRSSUtils rssValue:self.evenCounts maxWidth:evenWidest noNarrow:NO];
+    int tOdd = ZX_RSS14_INSIDE_ODD_TOTAL_SUBSET[group];
+    int gSum = ZX_RSS14_INSIDE_GSUM[group];
+    return [[ZXRSSDataCharacter alloc] initWithValue:vEven * tOdd + vOdd + gSum checksumPortion:checksumPortion];
   }
 }
 
-- (NSArray *)findFinderPattern:(ZXBitArray *)row rowOffset:(int)rowOffset rightFinderPattern:(BOOL)rightFinderPattern {
-  int countersLen = self.decodeFinderCountersLen;
-  int *counters = self.decodeFinderCounters;
-  counters[0] = 0;
-  counters[1] = 0;
-  counters[2] = 0;
-  counters[3] = 0;
+- (ZXIntArray *)findFinderPattern:(ZXBitArray *)row rowOffset:(int)rowOffset rightFinderPattern:(BOOL)rightFinderPattern {
+  ZXIntArray *counters = self.decodeFinderCounters;
+  [counters clear];
+  int32_t *array = counters.array;
 
   int width = row.size;
   BOOL isWhite = NO;
@@ -289,22 +279,22 @@ const int INSIDE_ODD_WIDEST[4] = {2,4,6,8};
   int patternStart = rowOffset;
   for (int x = rowOffset; x < width; x++) {
     if ([row get:x] ^ isWhite) {
-      counters[counterPosition]++;
+      array[counterPosition]++;
     } else {
       if (counterPosition == 3) {
-        if ([ZXAbstractRSSReader isFinderPattern:counters countersLen:countersLen]) {
-          return @[@(patternStart), @(x)];
+        if ([ZXAbstractRSSReader isFinderPattern:counters]) {
+          return [[ZXIntArray alloc] initWithInts:patternStart, x, -1];
         }
-        patternStart += counters[0] + counters[1];
-        counters[0] = counters[2];
-        counters[1] = counters[3];
-        counters[2] = 0;
-        counters[3] = 0;
+        patternStart += array[0] + array[1];
+        array[0] = array[2];
+        array[1] = array[3];
+        array[2] = 0;
+        array[3] = 0;
         counterPosition--;
       } else {
         counterPosition++;
       }
-      counters[counterPosition] = 1;
+      array[counterPosition] = 1;
       isWhite = !isWhite;
     }
   }
@@ -312,43 +302,43 @@ const int INSIDE_ODD_WIDEST[4] = {2,4,6,8};
   return nil;
 }
 
-- (ZXRSSFinderPattern *)parseFoundFinderPattern:(ZXBitArray *)row rowNumber:(int)rowNumber right:(BOOL)right startEnd:(NSArray *)startEnd {
-  BOOL firstIsBlack = [row get:[startEnd[0] intValue]];
-  int firstElementStart = [startEnd[0] intValue] - 1;
+- (ZXRSSFinderPattern *)parseFoundFinderPattern:(ZXBitArray *)row rowNumber:(int)rowNumber right:(BOOL)right startEnd:(ZXIntArray *)startEnd {
+  BOOL firstIsBlack = [row get:startEnd.array[0]];
+  int firstElementStart = startEnd.array[0] - 1;
 
   while (firstElementStart >= 0 && firstIsBlack ^ [row get:firstElementStart]) {
     firstElementStart--;
   }
 
   firstElementStart++;
-  int firstCounter = [startEnd[0] intValue] - firstElementStart;
+  int firstCounter = startEnd.array[0] - firstElementStart;
 
-  int countersLen = self.decodeFinderCountersLen;
-  int *counters = self.decodeFinderCounters;
-  for (int i = countersLen - 1; i > 0; i--) {
-    counters[i] = counters[i-1];
+  ZXIntArray *counters = self.decodeFinderCounters;
+  int32_t *array = counters.array;
+  for (int i = counters.length - 1; i > 0; i--) {
+    array[i] = array[i-1];
   }
-  counters[0] = firstCounter;
-  int value = [ZXAbstractRSSReader parseFinderValue:counters countersSize:countersLen finderPatternType:RSS_PATTERNS_RSS14_PATTERNS];
+  array[0] = firstCounter;
+  int value = [ZXAbstractRSSReader parseFinderValue:counters finderPatternType:ZX_RSS_PATTERNS_RSS14_PATTERNS];
   if (value == -1) {
     return nil;
   }
   int start = firstElementStart;
-  int end = [startEnd[1] intValue];
+  int end = startEnd.array[1];
   if (right) {
     start = [row size] - 1 - start;
     end = [row size] - 1 - end;
   }
   return [[ZXRSSFinderPattern alloc] initWithValue:value
-                                           startEnd:[@[@(firstElementStart), startEnd[1]] mutableCopy]
+                                           startEnd:[[ZXIntArray alloc] initWithInts:firstElementStart, startEnd.array[1], -1]
                                               start:start
                                                 end:end
                                           rowNumber:rowNumber];
 }
 
 - (BOOL)adjustOddEvenCounts:(BOOL)outsideChar numModules:(int)numModules {
-  int oddSum = [ZXAbstractRSSReader count:self.oddCounts arrayLen:self.oddCountsLen];
-  int evenSum = [ZXAbstractRSSReader count:self.evenCounts arrayLen:self.evenCountsLen];
+  int oddSum = [ZXAbstractRSSReader count:self.oddCounts];
+  int evenSum = [ZXAbstractRSSReader count:self.evenCounts];
   int mismatch = oddSum + evenSum - numModules;
   BOOL oddParityBad = (oddSum & 0x01) == (outsideChar ? 1 : 0);
   BOOL evenParityBad = (evenSum & 0x01) == 1;
@@ -430,19 +420,19 @@ const int INSIDE_ODD_WIDEST[4] = {2,4,6,8};
     if (decrementOdd) {
       return NO;
     }
-    [ZXAbstractRSSReader increment:self.oddCounts arrayLen:self.oddCountsLen errors:self.oddRoundingErrors];
+    [ZXAbstractRSSReader increment:self.oddCounts errors:self.oddRoundingErrors];
   }
   if (decrementOdd) {
-    [ZXAbstractRSSReader decrement:self.oddCounts arrayLen:self.oddCountsLen errors:self.oddRoundingErrors];
+    [ZXAbstractRSSReader decrement:self.oddCounts errors:self.oddRoundingErrors];
   }
   if (incrementEven) {
     if (decrementEven) {
       return NO;
     }
-    [ZXAbstractRSSReader increment:self.evenCounts arrayLen:self.evenCountsLen errors:self.oddRoundingErrors];
+    [ZXAbstractRSSReader increment:self.evenCounts errors:self.oddRoundingErrors];
   }
   if (decrementEven) {
-    [ZXAbstractRSSReader decrement:self.evenCounts arrayLen:self.evenCountsLen errors:self.evenRoundingErrors];
+    [ZXAbstractRSSReader decrement:self.evenCounts errors:self.evenRoundingErrors];
   }
   return YES;
 }

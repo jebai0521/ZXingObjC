@@ -18,9 +18,24 @@
 
 @interface ZXGeoParsedResult : ZXParsedResult
 
-@property (nonatomic, readonly) double latitude;
-@property (nonatomic, readonly) double longitude;
-@property (nonatomic, readonly) double altitude;
+/**
+ * @return latitude in degrees
+ */
+@property (nonatomic, assign, readonly) double latitude;
+
+/**
+ * @return longitude in degrees
+ */
+@property (nonatomic, assign, readonly) double longitude;
+
+/**
+ * @return altitude in meters. If not specified, in the geo URI, returns 0.0
+ */
+@property (nonatomic, assign, readonly) double altitude;
+
+/**
+ * @return query string associated with geo URI or null if none exists
+ */
 @property (nonatomic, copy, readonly) NSString *query;
 
 - (id)initWithLatitude:(double)latitude longitude:(double)longitude altitude:(double)altitude query:(NSString *)query;

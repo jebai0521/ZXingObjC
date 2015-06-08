@@ -17,18 +17,22 @@
 #import "ZXBitArray.h"
 #import "ZXCode39Reader.h"
 #import "ZXErrors.h"
+#import "ZXIntArray.h"
 #import "ZXResult.h"
 #import "ZXResultPoint.h"
 
-char CODE39_ALPHABET[] = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ-. *$/+%";
-NSString *CODE39_ALPHABET_STRING = @"0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ-. *$/+%";
+unichar ZX_CODE39_ALPHABET[] = {'0', '1', '2', '3', '4', '5', '6', '7', '8', '9', 'A', 'B', 'C', 'D',
+  'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L', 'M', 'N', 'O', 'P', 'Q', 'R', 'S', 'T', 'U', 'V', 'W',
+  'X', 'Y', 'Z', '-', '.', ' ', '*', '$', '/', '+', '%'};
+NSString *ZX_CODE39_ALPHABET_STRING = nil;
+
 
 /**
  * These represent the encodings of characters, as patterns of wide and narrow bars.
  * The 9 least-significant bits of each int correspond to the pattern of wide and narrow,
  * with 1s representing "wide" and 0s representing narrow.
  */
-int CODE39_CHARACTER_ENCODINGS[44] = {
+const int ZX_CODE39_CHARACTER_ENCODINGS[] = {
   0x034, 0x121, 0x061, 0x160, 0x031, 0x130, 0x070, 0x025, 0x124, 0x064, // 0-9
   0x109, 0x049, 0x148, 0x019, 0x118, 0x058, 0x00D, 0x10C, 0x04C, 0x01C, // A-J
   0x103, 0x043, 0x142, 0x013, 0x112, 0x052, 0x007, 0x106, 0x046, 0x016, // K-T
@@ -36,85 +40,76 @@ int CODE39_CHARACTER_ENCODINGS[44] = {
   0x0A8, 0x0A2, 0x08A, 0x02A // $-%
 };
 
-int const CODE39_ASTERISK_ENCODING = 0x094;
+const int ZX_CODE39_ASTERISK_ENCODING = 0x094;
 
 @interface ZXCode39Reader ()
 
-@property (nonatomic, assign) BOOL extendedMode;
-@property (nonatomic, assign) BOOL usingCheckDigit;
+@property (nonatomic, assign, readonly) BOOL extendedMode;
+@property (nonatomic, assign, readonly) BOOL usingCheckDigit;
+@property (nonatomic, strong, readonly) ZXIntArray *counters;
 
 @end
 
 @implementation ZXCode39Reader
 
-/**
- * Creates a reader that assumes all encoded data is data, and does not treat the final
- * character as a check digit. It will not decoded "extended Code 39" sequences.
- */
++ (void)load {
+  ZX_CODE39_ALPHABET_STRING = [[NSString alloc] initWithCharacters:ZX_CODE39_ALPHABET
+                                                            length:sizeof(ZX_CODE39_ALPHABET) / sizeof(unichar)];
+}
+
 - (id)init {
   return [self initUsingCheckDigit:NO extendedMode:NO];
 }
 
-
-/**
- * Creates a reader that can be configured to check the last character as a check digit.
- * It will not decoded "extended Code 39" sequences.
- */
-- (id)initUsingCheckDigit:(BOOL)isUsingCheckDigit {  
+- (id)initUsingCheckDigit:(BOOL)isUsingCheckDigit {
   return [self initUsingCheckDigit:isUsingCheckDigit extendedMode:NO];
 }
 
-
-/**
- * Creates a reader that can be configured to check the last character as a check digit,
- * or optionally attempt to decode "extended Code 39" sequences that are used to encode
- * the full ASCII character set.
- */
 - (id)initUsingCheckDigit:(BOOL)usingCheckDigit extendedMode:(BOOL)extendedMode {
   if (self = [super init]) {
     _usingCheckDigit = usingCheckDigit;
     _extendedMode = extendedMode;
+    _counters = [[ZXIntArray alloc] initWithLength:9];
   }
 
   return self;
 }
 
 - (ZXResult *)decodeRow:(int)rowNumber row:(ZXBitArray *)row hints:(ZXDecodeHints *)hints error:(NSError **)error {
-  const int countersLen = 9;
-  int counters[countersLen];
-  memset(counters, 0, countersLen * sizeof(int));
+  ZXIntArray *theCounters = self.counters;
+  [theCounters clear];
+  NSMutableString *result = [NSMutableString stringWithCapacity:20];
 
-  int start[2] = {0};
-  if (![self findAsteriskPattern:row a:&start[0] b:&start[1] counters:counters countersLen:countersLen]) {
-    if (error) *error = NotFoundErrorInstance();
+  ZXIntArray *start = [self findAsteriskPattern:row counters:theCounters];
+  if (!start) {
+    if (error) *error = ZXNotFoundErrorInstance();
     return nil;
   }
   // Read off white space
-  int nextStart = [row nextSet:start[1]];
+  int nextStart = [row nextSet:start.array[1]];
   int end = [row size];
 
-  NSMutableString *result = [NSMutableString stringWithCapacity:20];
   unichar decodedChar;
   int lastStart;
   do {
-    if (![ZXOneDReader recordPattern:row start:nextStart counters:counters countersSize:countersLen]) {
-      if (error) *error = NotFoundErrorInstance();
+    if (![ZXOneDReader recordPattern:row start:nextStart counters:theCounters]) {
+      if (error) *error = ZXNotFoundErrorInstance();
       return nil;
     }
-    int pattern = [self toNarrowWidePattern:(int *)counters countersLen:countersLen];
+    int pattern = [self toNarrowWidePattern:theCounters];
     if (pattern < 0) {
-      if (error) *error = NotFoundErrorInstance();
+      if (error) *error = ZXNotFoundErrorInstance();
       return nil;
     }
     decodedChar = [self patternToChar:pattern];
     if (decodedChar == 0) {
-      if (error) *error = NotFoundErrorInstance();
+      if (error) *error = ZXNotFoundErrorInstance();
       return nil;
     }
     [result appendFormat:@"%C", decodedChar];
     lastStart = nextStart;
-    for (int i = 0; i < sizeof(counters) / sizeof(int); i++) {
-      nextStart += counters[i];
+    for (int i = 0; i < theCounters.length; i++) {
+      nextStart += theCounters.array[i];
     }
     // Read off white space
     nextStart = [row nextSet:nextStart];
@@ -122,12 +117,12 @@ int const CODE39_ASTERISK_ENCODING = 0x094;
   [result deleteCharactersInRange:NSMakeRange([result length] - 1, 1)];
 
   int lastPatternSize = 0;
-  for (int i = 0; i < sizeof(counters) / sizeof(int); i++) {
-    lastPatternSize += counters[i];
+  for (int i = 0; i < theCounters.length; i++) {
+    lastPatternSize += theCounters.array[i];
   }
   int whiteSpaceAfterEnd = nextStart - lastStart - lastPatternSize;
-  if (nextStart != end && (whiteSpaceAfterEnd >> 1) < lastPatternSize) {
-    if (error) *error = NotFoundErrorInstance();
+  if (nextStart != end && (whiteSpaceAfterEnd * 2) < lastPatternSize) {
+    if (error) *error = ZXNotFoundErrorInstance();
     return nil;
   }
 
@@ -135,10 +130,10 @@ int const CODE39_ASTERISK_ENCODING = 0x094;
     int max = (int)[result length] - 1;
     int total = 0;
     for (int i = 0; i < max; i++) {
-      total += [CODE39_ALPHABET_STRING rangeOfString:[result substringWithRange:NSMakeRange(i, 1)]].location;
+      total += [ZX_CODE39_ALPHABET_STRING rangeOfString:[result substringWithRange:NSMakeRange(i, 1)]].location;
     }
-    if ([result characterAtIndex:max] != CODE39_ALPHABET[total % 43]) {
-      if (error) *error = ChecksumErrorInstance();
+    if ([result characterAtIndex:max] != ZX_CODE39_ALPHABET[total % 43]) {
+      if (error) *error = ZXChecksumErrorInstance();
       return nil;
     }
     [result deleteCharactersInRange:NSMakeRange(max, 1)];
@@ -146,7 +141,7 @@ int const CODE39_ASTERISK_ENCODING = 0x094;
 
   if ([result length] == 0) {
     // false positive
-    if (error) *error = NotFoundErrorInstance();
+    if (error) *error = ZXNotFoundErrorInstance();
     return nil;
   }
 
@@ -154,69 +149,69 @@ int const CODE39_ASTERISK_ENCODING = 0x094;
   if (self.extendedMode) {
     resultString = [self decodeExtended:result];
     if (!resultString) {
-      if (error) *error = FormatErrorInstance();
+      if (error) *error = ZXFormatErrorInstance();
       return nil;
     }
   } else {
     resultString = result;
   }
 
-  float left = (float) (start[1] + start[0]) / 2.0f;
-  float right = (float)(nextStart + lastStart) / 2.0f;
+  float left = (float) (start.array[1] + start.array[0]) / 2.0f;
+  float right = (lastStart + lastPatternSize) / 2.0f;
 
   return [ZXResult resultWithText:resultString
                          rawBytes:nil
-                           length:0
                      resultPoints:@[[[ZXResultPoint alloc] initWithX:left y:(float)rowNumber],
-                                   [[ZXResultPoint alloc] initWithX:right y:(float)rowNumber]]
+                                    [[ZXResultPoint alloc] initWithX:right y:(float)rowNumber]]
                            format:kBarcodeFormatCode39];
 }
 
-- (BOOL)findAsteriskPattern:(ZXBitArray *)row a:(int *)a b:(int *)b counters:(int *)counters countersLen:(int)countersLen {
+- (ZXIntArray *)findAsteriskPattern:(ZXBitArray *)row counters:(ZXIntArray *)counters {
   int width = row.size;
   int rowOffset = [row nextSet:0];
 
   int counterPosition = 0;
   int patternStart = rowOffset;
   BOOL isWhite = NO;
+  int patternLength = counters.length;
+  int32_t *array = counters.array;
 
   for (int i = rowOffset; i < width; i++) {
     if ([row get:i] ^ isWhite) {
-      counters[counterPosition]++;
+      array[counterPosition]++;
     } else {
-      if (counterPosition == countersLen - 1) {
-        if ([self toNarrowWidePattern:counters countersLen:countersLen] == CODE39_ASTERISK_ENCODING &&
-            [row isRange:MAX(0, patternStart - ((i - patternStart) >> 1)) end:patternStart value:NO]) {
-          if (a) *a = patternStart;
-          if (b) *b = i;
-          return YES;
+      if (counterPosition == patternLength - 1) {
+        if ([self toNarrowWidePattern:counters] == ZX_CODE39_ASTERISK_ENCODING &&
+            [row isRange:MAX(0, patternStart - ((i - patternStart) / 2)) end:patternStart value:NO]) {
+          return [[ZXIntArray alloc] initWithInts:patternLength, i, -1];
         }
-        patternStart += counters[0] + counters[1];
-        for (int y = 2; y < countersLen; y++) {
-          counters[y - 2] = counters[y];
+        patternStart += array[0] + array[1];
+        for (int y = 2; y < counters.length; y++) {
+          array[y - 2] = array[y];
         }
-        counters[countersLen - 2] = 0;
-        counters[countersLen - 1] = 0;
+        array[patternLength - 2] = 0;
+        array[patternLength - 1] = 0;
         counterPosition--;
       } else {
         counterPosition++;
       }
-      counters[counterPosition] = 1;
+      array[counterPosition] = 1;
       isWhite = !isWhite;
     }
   }
 
-  return NO;
+  return nil;
 }
 
-- (int)toNarrowWidePattern:(int *)counters countersLen:(unsigned int)countersLen {
-  int numCounters = countersLen;
+- (int)toNarrowWidePattern:(ZXIntArray *)counters {
+  int numCounters = counters.length;
   int maxNarrowCounter = 0;
   int wideCounters;
   do {
     int minCounter = INT_MAX;
+    int32_t *array = counters.array;
     for (int i = 0; i < numCounters; i++) {
-      int counter = counters[i];
+      int counter = array[i];
       if (counter < minCounter && counter > maxNarrowCounter) {
         minCounter = counter;
       }
@@ -226,8 +221,8 @@ int const CODE39_ASTERISK_ENCODING = 0x094;
     int totalWideCountersWidth = 0;
     int pattern = 0;
     for (int i = 0; i < numCounters; i++) {
-      int counter = counters[i];
-      if (counters[i] > maxNarrowCounter) {
+      int counter = array[i];
+      if (array[i] > maxNarrowCounter) {
         pattern |= 1 << (numCounters - 1 - i);
         wideCounters++;
         totalWideCountersWidth += counter;
@@ -235,10 +230,10 @@ int const CODE39_ASTERISK_ENCODING = 0x094;
     }
     if (wideCounters == 3) {
       for (int i = 0; i < numCounters && wideCounters > 0; i++) {
-        int counter = counters[i];
-        if (counters[i] > maxNarrowCounter) {
+        int counter = array[i];
+        if (array[i] > maxNarrowCounter) {
           wideCounters--;
-          if ((counter << 1) >= totalWideCountersWidth) {
+          if ((counter * 2) >= totalWideCountersWidth) {
             return -1;
           }
         }
@@ -250,9 +245,9 @@ int const CODE39_ASTERISK_ENCODING = 0x094;
 }
 
 - (unichar)patternToChar:(int)pattern {
-  for (int i = 0; i < sizeof(CODE39_CHARACTER_ENCODINGS) / sizeof(int); i++) {
-    if (CODE39_CHARACTER_ENCODINGS[i] == pattern) {
-      return CODE39_ALPHABET[i];
+  for (int i = 0; i < sizeof(ZX_CODE39_CHARACTER_ENCODINGS) / sizeof(int); i++) {
+    if (ZX_CODE39_CHARACTER_ENCODINGS[i] == pattern) {
+      return ZX_CODE39_ALPHABET[i];
     }
   }
   return 0;

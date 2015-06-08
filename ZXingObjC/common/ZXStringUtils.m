@@ -14,14 +14,16 @@
  * limitations under the License.
  */
 
+#import "ZXByteArray.h"
 #import "ZXDecodeHints.h"
 #import "ZXStringUtils.h"
 
 @implementation ZXStringUtils
 
-+ (NSStringEncoding)guessEncoding:(int8_t *)bytes length:(unsigned int)length hints:(ZXDecodeHints *)hints {
-  BOOL assumeShiftJIS = CFStringGetSystemEncoding() == NSShiftJISStringEncoding || CFStringGetSystemEncoding() == NSJapaneseEUCStringEncoding;
-  
++ (NSStringEncoding)guessEncoding:(ZXByteArray *)bytes hints:(ZXDecodeHints *)hints {
+  NSStringEncoding systemEncoding = CFStringConvertEncodingToNSStringEncoding(CFStringGetSystemEncoding());
+  BOOL assumeShiftJIS = systemEncoding == NSShiftJISStringEncoding || systemEncoding == NSJapaneseEUCStringEncoding;
+
   if (hints != nil) {
     NSStringEncoding encoding = hints.encoding;
     if (encoding > 0) {
@@ -30,6 +32,7 @@
   }
   // For now, merely tries to distinguish ISO-8859-1, UTF-8 and Shift_JIS,
   // which should be by far the most common encodings.
+  int length = bytes.length;
   BOOL canBeISO88591 = YES;
   BOOL canBeShiftJIS = YES;
   BOOL canBeUTF8 = YES;
@@ -51,15 +54,15 @@
   int isoHighOther = 0;
 
   BOOL utf8bom = length > 3 &&
-    bytes[0] == (int8_t) 0xEF &&
-    bytes[1] == (int8_t) 0xBB &&
-    bytes[2] == (int8_t) 0xBF;
+    bytes.array[0] == (int8_t) 0xEF &&
+    bytes.array[1] == (int8_t) 0xBB &&
+    bytes.array[2] == (int8_t) 0xBF;
 
   for (int i = 0;
        i < length && (canBeISO88591 || canBeShiftJIS || canBeUTF8);
        i++) {
 
-    int value = bytes[i] & 0xFF;
+    int value = bytes.array[i] & 0xFF;
 
     // UTF-8 stuff
     if (canBeUTF8) {
@@ -179,7 +182,7 @@
     return NSUTF8StringEncoding;
   }
   // Otherwise, we take a wild guess with platform encoding
-  return CFStringGetSystemEncoding();
+  return systemEncoding;
 }
 
 @end

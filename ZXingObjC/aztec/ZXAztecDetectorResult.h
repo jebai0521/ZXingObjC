@@ -14,15 +14,14 @@
  * limitations under the License.
  */
 
-#import "ZXResultPoint.h"
 #import "ZXBitMatrix.h"
 #import "ZXDetectorResult.h"
 
 @interface ZXAztecDetectorResult : ZXDetectorResult
 
-@property (nonatomic, readonly) BOOL compact;
-@property (nonatomic, readonly) int nbDatablocks;
-@property (nonatomic, readonly) int nbLayers;
+@property (nonatomic, assign, readonly, getter = isCompact) BOOL compact;
+@property (nonatomic, assign, readonly) int nbDatablocks;
+@property (nonatomic, assign, readonly) int nbLayers;
 
 - (id)initWithBits:(ZXBitMatrix *)bits
             points:(NSArray *)points

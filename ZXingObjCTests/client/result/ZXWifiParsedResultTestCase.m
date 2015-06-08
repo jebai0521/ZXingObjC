@@ -51,20 +51,24 @@
   [self doTestWithContents:@"WIFI:S:TenChars;P:hello\\:there;T:WEP;;" ssid:@"TenChars" password:@"hello:there" type:@"WEP"];
 }
 
+- (void)testEscape {
+  [self doTestWithContents:@"WIFI:T:WPA;S:test;P:my_password\\\\;;" ssid:@"test" password:@"my_password\\" type:@"WPA"];
+}
+
 /**
  * Given the string contents for the barcode, check that it matches our expectations
  */
 - (void)doTestWithContents:(NSString *)contents ssid:(NSString *)ssid password:(NSString *)password type:(NSString *)type {
-  ZXResult *fakeResult = [ZXResult resultWithText:contents rawBytes:NULL length:0 resultPoints:nil format:kBarcodeFormatQRCode];
+  ZXResult *fakeResult = [ZXResult resultWithText:contents rawBytes:nil resultPoints:nil format:kBarcodeFormatQRCode];
   ZXParsedResult *result = [ZXResultParser parseResult:fakeResult];
 
   // Ensure it is a wifi code
-  XCTAssertEqual(result.type, kParsedResultTypeWifi, @"Types don't match");
+  XCTAssertEqual(kParsedResultTypeWifi, result.type);
   ZXWifiParsedResult *wifiResult = (ZXWifiParsedResult *)result;
 
-  XCTAssertEqualObjects(wifiResult.ssid, ssid, @"Ssid's don't match");
-  XCTAssertEqualObjects(wifiResult.password, password, @"Passwords don't match");
-  XCTAssertEqualObjects(wifiResult.networkEncryption, type, @"Network encryption doesn't match");
+  XCTAssertEqualObjects(ssid, wifiResult.ssid);
+  XCTAssertEqualObjects(password, wifiResult.password);
+  XCTAssertEqualObjects(type, wifiResult.networkEncryption);
 }
 
 @end

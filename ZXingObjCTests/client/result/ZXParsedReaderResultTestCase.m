@@ -257,13 +257,13 @@
                     goldenResult:(NSString *)goldenResult
                             type:(ZXParsedResultType)type
                           format:(ZXBarcodeFormat)format {
-  ZXResult *fakeResult = [ZXResult resultWithText:contents rawBytes:NULL length:0 resultPoints:nil format:format];
+  ZXResult *fakeResult = [ZXResult resultWithText:contents rawBytes:nil resultPoints:nil format:format];
   ZXParsedResult *result = [ZXResultParser parseResult:fakeResult];
-  XCTAssertNotNil(result, @"Result is nil");
-  XCTAssertEqual(result.type, type, @"Types don't match");
+  XCTAssertNotNil(result);
+  XCTAssertEqual(type, result.type);
 
   NSString *displayResult = result.displayResult;
-  XCTAssertEqualObjects(displayResult, goldenResult, @"Display result doesn't match golden result");
+  XCTAssertEqualObjects(goldenResult, displayResult);
 }
 
 @end

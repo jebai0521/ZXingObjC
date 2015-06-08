@@ -26,7 +26,7 @@
 
 @interface ZXMultiFormatUPCEANReader ()
 
-@property (nonatomic, strong) NSMutableArray *readers;
+@property (nonatomic, strong, readonly) NSMutableArray *readers;
 
 @end
 
@@ -91,7 +91,6 @@
       // Transfer the metdata across
       ZXResult *resultUPCA = [ZXResult resultWithText:[result.text substringFromIndex:1]
                                              rawBytes:result.rawBytes
-                                               length:result.length
                                          resultPoints:result.resultPoints
                                                format:kBarcodeFormatUPCA];
       [resultUPCA putAllMetadata:result.resultMetadata];
@@ -100,7 +99,7 @@
     return result;
   }
 
-  if (error) *error = NotFoundErrorInstance();
+  if (error) *error = ZXNotFoundErrorInstance();
   return nil;
 }
 

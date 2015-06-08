@@ -28,7 +28,7 @@
 
 @interface ZXMultiFormatOneDReader ()
 
-@property (nonatomic, strong) NSMutableArray *readers;
+@property (nonatomic, strong, readonly) NSMutableArray *readers;
 
 @end
 
@@ -98,7 +98,7 @@
     }
   }
 
-  if (error) *error = NotFoundErrorInstance();
+  if (error) *error = ZXNotFoundErrorInstance();
   return nil;
 }
 

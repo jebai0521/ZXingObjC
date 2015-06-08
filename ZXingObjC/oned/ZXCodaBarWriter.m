@@ -14,50 +14,68 @@
  * limitations under the License.
  */
 
+#import "ZXBoolArray.h"
 #import "ZXCodaBarReader.h"
 #import "ZXCodaBarWriter.h"
 
-const int START_END_CHARS_LEN = 4;
-const char START_END_CHARS[START_END_CHARS_LEN] = "ABCD";
-
-const int ALT_START_END_CHARS_LEN = 4;
-const char ALT_START_END_CHARS[ALT_START_END_CHARS_LEN] = "TN*E";
+const unichar ZX_CODA_START_END_CHARS[] = {'A', 'B', 'C', 'D'};
+const unichar ZX_CODA_ALT_START_END_CHARS[] = {'T', 'N', '*', 'E'};
+const unichar ZX_CHARS_WHICH_ARE_TEN_LENGTH_EACH_AFTER_DECODED[] = {'/', ':', '+', '.'};
+static unichar ZX_CODA_DEFAULT_GUARD;
 
 @implementation ZXCodaBarWriter
 
-- (BOOL *)encode:(NSString *)contents length:(int *)pLength {
-  if ([contents length] < 2) {
-    @throw [NSException exceptionWithName:NSInvalidArgumentException
-                                   reason:@"Codabar should start/end with start/stop symbols"
-                                 userInfo:nil];
-  }
++ (void)initialize {
+  if ([self class] != [ZXCodaBarWriter class]) return;
 
-  // Verify input and calculate decoded length.
-  unichar firstChar = [[contents uppercaseString] characterAtIndex:0];
-  unichar lastChar = [[contents uppercaseString] characterAtIndex:contents.length - 1];
-  BOOL startsEndsNormal =
-    [ZXCodaBarReader arrayContains:(char *)START_END_CHARS length:START_END_CHARS_LEN key:firstChar] &&
-    [ZXCodaBarReader arrayContains:(char *)START_END_CHARS length:START_END_CHARS_LEN key:lastChar];
-  BOOL startsEndsAlt =
-    [ZXCodaBarReader arrayContains:(char *)ALT_START_END_CHARS length:ALT_START_END_CHARS_LEN key:firstChar] &&
-    [ZXCodaBarReader arrayContains:(char *)ALT_START_END_CHARS length:ALT_START_END_CHARS_LEN key:lastChar];
-  if (!(startsEndsNormal || startsEndsAlt)) {
-    NSString *reason = [NSString stringWithFormat:@"Codabar should start/end with %@, or start/end with %@",
-                        [NSString stringWithCString:START_END_CHARS encoding:NSUTF8StringEncoding],
-                        [NSString stringWithCString:ALT_START_END_CHARS encoding:NSUTF8StringEncoding]];
-    @throw [NSException exceptionWithName:NSInvalidArgumentException
-                                   reason:reason
-                                 userInfo:nil];
+  ZX_CODA_DEFAULT_GUARD = ZX_CODA_START_END_CHARS[0];
+}
+
+- (ZXBoolArray *)encode:(NSString *)contents {
+  if ([contents length] < 2) {
+    // Can't have a start/end guard, so tentatively add default guards
+    contents = [NSString stringWithFormat:@"%C%@%C", ZX_CODA_DEFAULT_GUARD, contents, ZX_CODA_DEFAULT_GUARD];
+  } else {
+    // Verify input and calculate decoded length.
+    unichar firstChar = [[contents uppercaseString] characterAtIndex:0];
+    unichar lastChar = [[contents uppercaseString] characterAtIndex:contents.length - 1];
+    BOOL startsNormal = [ZXCodaBarReader arrayContains:ZX_CODA_START_END_CHARS length:sizeof(ZX_CODA_START_END_CHARS) / sizeof(unichar) key:firstChar];
+    BOOL endsNormal = [ZXCodaBarReader arrayContains:ZX_CODA_START_END_CHARS length:sizeof(ZX_CODA_START_END_CHARS) / sizeof(unichar) key:lastChar];
+    BOOL startsAlt = [ZXCodaBarReader arrayContains:ZX_CODA_ALT_START_END_CHARS length:sizeof(ZX_CODA_ALT_START_END_CHARS) / sizeof(unichar) key:firstChar];
+    BOOL endsAlt = [ZXCodaBarReader arrayContains:ZX_CODA_ALT_START_END_CHARS length:sizeof(ZX_CODA_ALT_START_END_CHARS) / sizeof(unichar) key:lastChar];
+    if (startsNormal) {
+      if (!endsNormal) {
+        @throw [NSException exceptionWithName:NSInvalidArgumentException
+                                       reason:[NSString stringWithFormat:@"Invalid start/end guards: %@", contents]
+                                     userInfo:nil];
+      }
+      // else already has valid start/end
+    } else if (startsAlt) {
+      if (!endsAlt) {
+        @throw [NSException exceptionWithName:NSInvalidArgumentException
+                                       reason:[NSString stringWithFormat:@"Invalid start/end guards: %@", contents]
+                                     userInfo:nil];
+      }
+      // else already has valid start/end
+    } else {
+      // Doesn't start with a guard
+      if (endsNormal || endsAlt) {
+        @throw [NSException exceptionWithName:NSInvalidArgumentException
+                                       reason:[NSString stringWithFormat:@"Invalid start/end guards: %@", contents]
+                                     userInfo:nil];
+      }
+      // else doesn't end with guard either, so add a default
+      contents = [NSString stringWithFormat:@"%C%@%C", ZX_CODA_DEFAULT_GUARD, contents, ZX_CODA_DEFAULT_GUARD];
+    }
   }
 
   // The start character and the end character are decoded to 10 length each.
   int resultLength = 20;
-  char charsWhichAreTenLengthEachAfterDecoded[4] = {'/', ':', '+', '.'};
   for (int i = 1; i < contents.length - 1; i++) {
     if (([contents characterAtIndex:i] >= '0' && [contents characterAtIndex:i] <= '9') ||
         [contents characterAtIndex:i] == '-' || [contents characterAtIndex:i] == '$') {
       resultLength += 9;
-    } else if ([ZXCodaBarReader arrayContains:charsWhichAreTenLengthEachAfterDecoded length:4 key:[contents characterAtIndex:i]]) {
+    } else if ([ZXCodaBarReader arrayContains:ZX_CHARS_WHICH_ARE_TEN_LENGTH_EACH_AFTER_DECODED length:4 key:[contents characterAtIndex:i]]) {
       resultLength += 10;
     } else {
       @throw [NSException exceptionWithName:NSInvalidArgumentException
@@ -68,13 +86,12 @@ const char ALT_START_END_CHARS[ALT_START_END_CHARS_LEN] = "TN*E";
   // A blank is placed between each character.
   resultLength += contents.length - 1;
 
-  if (pLength) *pLength = resultLength;
-  BOOL *result = (BOOL *)malloc(resultLength * sizeof(BOOL));
+  ZXBoolArray *result = [[ZXBoolArray alloc] initWithLength:resultLength];
   int position = 0;
   for (int index = 0; index < contents.length; index++) {
     unichar c = [[contents uppercaseString] characterAtIndex:index];
-    if (index == contents.length - 1) {
-      // The end chars are not in the CodaBarReader.ALPHABET.
+    if (index == 0 || index == contents.length - 1) {
+      // The start/end chars are not in the CodaBarReader.ALPHABET.
       switch (c) {
         case 'T':
           c = 'A';
@@ -91,10 +108,10 @@ const char ALT_START_END_CHARS[ALT_START_END_CHARS_LEN] = "TN*E";
       }
     }
     int code = 0;
-    for (int i = 0; i < CODA_ALPHABET_LEN; i++) {
+    for (int i = 0; i < ZX_CODA_ALPHABET_LEN; i++) {
       // Found any, because I checked above.
-      if (c == CODA_ALPHABET[i]) {
-        code = CODA_CHARACTER_ENCODINGS[i];
+      if (c == ZX_CODA_ALPHABET[i]) {
+        code = ZX_CODA_CHARACTER_ENCODINGS[i];
         break;
       }
     }
@@ -102,7 +119,7 @@ const char ALT_START_END_CHARS[ALT_START_END_CHARS_LEN] = "TN*E";
     int counter = 0;
     int bit = 0;
     while (bit < 7) { // A character consists of 7 digit.
-      result[position] = color;
+      result.array[position] = color;
       position++;
       if (((code >> (6 - bit)) & 1) == 0 || counter == 1) {
         color = !color; // Flip the color.
@@ -113,7 +130,7 @@ const char ALT_START_END_CHARS[ALT_START_END_CHARS_LEN] = "TN*E";
       }
     }
     if (index < contents.length - 1) {
-      result[position] = NO;
+      result.array[position] = NO;
       position++;
     }
   }

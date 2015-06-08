@@ -15,16 +15,17 @@
  */
 
 #import "ZXAbstractRSSReader.h"
+#import "ZXIntArray.h"
 
-static int MAX_AVG_VARIANCE;
-static int MAX_INDIVIDUAL_VARIANCE;
+static float ZX_RSS_MAX_AVG_VARIANCE = 0.2f;
+static float ZX_RSS_MAX_INDIVIDUAL_VARIANCE = 0.45f;
 
-float const MIN_FINDER_PATTERN_RATIO = 9.5f / 12.0f;
-float const MAX_FINDER_PATTERN_RATIO = 12.5f / 14.0f;
+float const ZX_RSS_MIN_FINDER_PATTERN_RATIO = 9.5f / 12.0f;
+float const ZX_RSS_MAX_FINDER_PATTERN_RATIO = 12.5f / 14.0f;
 
-#define RSS14_FINDER_PATTERNS_LEN 9
-#define RSS14_FINDER_PATTERNS_SUB_LEN 4
-const int RSS14_FINDER_PATTERNS[RSS14_FINDER_PATTERNS_LEN][RSS14_FINDER_PATTERNS_SUB_LEN] = {
+#define ZX_RSS14_FINDER_PATTERNS_LEN 9
+#define ZX_RSS14_FINDER_PATTERNS_SUB_LEN 4
+const int ZX_RSS14_FINDER_PATTERNS[ZX_RSS14_FINDER_PATTERNS_LEN][ZX_RSS14_FINDER_PATTERNS_SUB_LEN] = {
   {3,8,2,1},
   {3,5,5,1},
   {3,3,7,1},
@@ -36,9 +37,9 @@ const int RSS14_FINDER_PATTERNS[RSS14_FINDER_PATTERNS_LEN][RSS14_FINDER_PATTERNS
   {1,3,9,1},
 };
 
-#define RSS_EXPANDED_FINDER_PATTERNS_LEN 6
-#define RSS_EXPANDED_FINDER_PATTERNS_SUB_LEN 4
-const int RSS_EXPANDED_FINDER_PATTERNS[RSS_EXPANDED_FINDER_PATTERNS_LEN][RSS_EXPANDED_FINDER_PATTERNS_SUB_LEN] = {
+#define ZX_RSS_EXPANDED_FINDER_PATTERNS_LEN 6
+#define ZX_RSS_EXPANDED_FINDER_PATTERNS_SUB_LEN 4
+const int ZX_RSS_EXPANDED_FINDER_PATTERNS[ZX_RSS_EXPANDED_FINDER_PATTERNS_LEN][ZX_RSS_EXPANDED_FINDER_PATTERNS_SUB_LEN] = {
   {1,8,4,1}, // A
   {3,6,4,1}, // B
   {3,4,6,1}, // C
@@ -49,20 +50,10 @@ const int RSS_EXPANDED_FINDER_PATTERNS[RSS_EXPANDED_FINDER_PATTERNS_LEN][RSS_EXP
 
 @implementation ZXAbstractRSSReader
 
-+ (void)initialize {
-  MAX_AVG_VARIANCE = (int)(PATTERN_MATCH_RESULT_SCALE_FACTOR * 0.2f);
-  MAX_INDIVIDUAL_VARIANCE = (int)(PATTERN_MATCH_RESULT_SCALE_FACTOR * 0.45f);
-}
-
 - (id)init {
   if (self = [super init]) {
-    _decodeFinderCountersLen = 4;
-    _decodeFinderCounters = (int *)malloc(_decodeFinderCountersLen * sizeof(int));
-    memset(self.decodeFinderCounters, 0, self.decodeFinderCountersLen * sizeof(int));
-
-    _dataCharacterCountersLen = 8;
-    _dataCharacterCounters = (int *)malloc(_dataCharacterCountersLen * sizeof(int));
-    memset(self.dataCharacterCounters, 0, self.dataCharacterCountersLen * sizeof(int));
+    _decodeFinderCounters = [[ZXIntArray alloc] initWithLength:4];
+    _dataCharacterCounters = [[ZXIntArray alloc] initWithLength:8];
 
     _oddRoundingErrorsLen = 4;
     _oddRoundingErrors = (float *)malloc(_oddRoundingErrorsLen * sizeof(float));
@@ -72,29 +63,14 @@ const int RSS_EXPANDED_FINDER_PATTERNS[RSS_EXPANDED_FINDER_PATTERNS_LEN][RSS_EXP
     _evenRoundingErrors = (float *)malloc(_evenRoundingErrorsLen * sizeof(float));
     memset(_evenRoundingErrors, 0, _evenRoundingErrorsLen * sizeof(float));
 
-    _oddCountsLen = _dataCharacterCountersLen / 2;
-    _oddCounts = (int *)malloc(_oddCountsLen * sizeof(int));
-    memset(_oddCounts, 0, _oddCountsLen * sizeof(int));
-
-    _evenCountsLen = _dataCharacterCountersLen / 2;
-    _evenCounts = (int *)malloc(_evenCountsLen * sizeof(int));
-    memset(_evenCounts, 0, _evenCountsLen * sizeof(int));
+    _oddCounts = [[ZXIntArray alloc] initWithLength:_dataCharacterCounters.length / 2];
+    _evenCounts = [[ZXIntArray alloc] initWithLength:_dataCharacterCounters.length / 2];
   }
 
   return self;
 }
 
 - (void)dealloc {
-  if (_decodeFinderCounters != NULL) {
-    free(_decodeFinderCounters);
-    _decodeFinderCounters = NULL;
-  }
-
-  if (_dataCharacterCounters != NULL) {
-    free(_dataCharacterCounters);
-    _dataCharacterCounters = NULL;
-  }
-
   if (_oddRoundingErrors != NULL) {
     free(_oddRoundingErrors);
     _oddRoundingErrors = NULL;
@@ -104,36 +80,26 @@ const int RSS_EXPANDED_FINDER_PATTERNS[RSS_EXPANDED_FINDER_PATTERNS_LEN][RSS_EXP
     free(_evenRoundingErrors);
     _evenRoundingErrors = NULL;
   }
-
-  if (_oddCounts != NULL) {
-    free(_oddCounts);
-    _oddCounts = NULL;
-  }
-
-  if (_evenCounts != NULL) {
-    free(_evenCounts);
-    _evenCounts = NULL;
-  }
 }
 
-+ (int)parseFinderValue:(int *)counters countersSize:(unsigned int)countersSize finderPatternType:(RSS_PATTERNS)finderPatternType {
++ (int)parseFinderValue:(ZXIntArray *)counters finderPatternType:(ZX_RSS_PATTERNS)finderPatternType {
   switch (finderPatternType) {
-    case RSS_PATTERNS_RSS14_PATTERNS:
-      for (int value = 0; value < RSS14_FINDER_PATTERNS_LEN; value++) {
-        if ([self patternMatchVariance:counters countersSize:countersSize pattern:(int *)RSS14_FINDER_PATTERNS[value] maxIndividualVariance:MAX_INDIVIDUAL_VARIANCE] < MAX_AVG_VARIANCE) {
+    case ZX_RSS_PATTERNS_RSS14_PATTERNS:
+      for (int value = 0; value < ZX_RSS14_FINDER_PATTERNS_LEN; value++) {
+        if ([self patternMatchVariance:counters pattern:ZX_RSS14_FINDER_PATTERNS[value] maxIndividualVariance:ZX_RSS_MAX_INDIVIDUAL_VARIANCE] < ZX_RSS_MAX_AVG_VARIANCE) {
           return value;
         }
       }
       break;
 
-    case RSS_PATTERNS_RSS_EXPANDED_PATTERNS:
-      for (int value = 0; value < RSS_EXPANDED_FINDER_PATTERNS_LEN; value++) {
-        if ([self patternMatchVariance:counters countersSize:countersSize pattern:(int *)RSS_EXPANDED_FINDER_PATTERNS[value] maxIndividualVariance:MAX_INDIVIDUAL_VARIANCE] < MAX_AVG_VARIANCE) {
+    case ZX_RSS_PATTERNS_RSS_EXPANDED_PATTERNS:
+      for (int value = 0; value < ZX_RSS_EXPANDED_FINDER_PATTERNS_LEN; value++) {
+        if ([self patternMatchVariance:counters pattern:ZX_RSS_EXPANDED_FINDER_PATTERNS[value] maxIndividualVariance:ZX_RSS_MAX_INDIVIDUAL_VARIANCE] < ZX_RSS_MAX_AVG_VARIANCE) {
           return value;
         }
       }
       break;
-      
+
     default:
       break;
   }
@@ -141,49 +107,44 @@ const int RSS_EXPANDED_FINDER_PATTERNS[RSS_EXPANDED_FINDER_PATTERNS_LEN][RSS_EXP
   return -1;
 }
 
-+ (int)count:(int *)array arrayLen:(unsigned int)arrayLen {
-  int count = 0;
-
-  for (int i = 0; i < arrayLen; i++) {
-    count += array[i];
-  }
-
-  return count;
++ (int)count:(ZXIntArray *)array {
+  return [array sum];
 }
 
-+ (void)increment:(int *)array arrayLen:(unsigned int)arrayLen errors:(float *)errors {
++ (void)increment:(ZXIntArray *)array errors:(float *)errors {
   int index = 0;
   float biggestError = errors[0];
-  for (int i = 1; i < arrayLen; i++) {
+  for (int i = 1; i < array.length; i++) {
     if (errors[i] > biggestError) {
       biggestError = errors[i];
       index = i;
     }
   }
-  array[index]++;
+  array.array[index]++;
 }
 
-+ (void)decrement:(int *)array arrayLen:(unsigned int)arrayLen errors:(float *)errors {
++ (void)decrement:(ZXIntArray *)array errors:(float *)errors {
   int index = 0;
   float biggestError = errors[0];
-  for (int i = 1; i < arrayLen; i++) {
+  for (int i = 1; i < array.length; i++) {
     if (errors[i] < biggestError) {
       biggestError = errors[i];
       index = i;
     }
   }
-  array[index]--;
+  array.array[index]--;
 }
 
-+ (BOOL)isFinderPattern:(int *)counters countersLen:(unsigned int)countersLen {
-  int firstTwoSum = counters[0] + counters[1];
-  int sum = firstTwoSum + counters[2] + counters[3];
++ (BOOL)isFinderPattern:(ZXIntArray *)counters {
+  int32_t *array = counters.array;
+  int firstTwoSum = array[0] + array[1];
+  int sum = firstTwoSum + array[2] + array[3];
   float ratio = (float)firstTwoSum / (float)sum;
-  if (ratio >= MIN_FINDER_PATTERN_RATIO && ratio <= MAX_FINDER_PATTERN_RATIO) {
+  if (ratio >= ZX_RSS_MIN_FINDER_PATTERN_RATIO && ratio <= ZX_RSS_MAX_FINDER_PATTERN_RATIO) {
     int minCounter = INT_MAX;
     int maxCounter = INT_MIN;
-    for (int i = 0; i < countersLen; i++) {
-      int counter = counters[i];
+    for (int i = 0; i < counters.length; i++) {
+      int counter = array[i];
       if (counter > maxCounter) {
         maxCounter = counter;
       }

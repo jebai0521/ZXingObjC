@@ -17,17 +17,20 @@
 #import "ZXBitArray.h"
 #import "ZXCode93Reader.h"
 #import "ZXErrors.h"
+#import "ZXIntArray.h"
 #import "ZXResult.h"
 #import "ZXResultPoint.h"
 
-const NSString *CODE93_ALPHABET_STRING = @"0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ-. $/+%abcd*";
-const char CODE93_ALPHABET[] = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ-. $/+%abcd*";
+NSString *ZX_CODE93_ALPHABET_STRING = nil;
+const unichar ZX_CODE93_ALPHABET[] = {'0', '1', '2', '3', '4', '5', '6', '7', '8', '9', 'A', 'B', 'C', 'D',
+  'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L', 'M', 'N', 'O', 'P', 'Q', 'R', 'S', 'T', 'U', 'V', 'W',
+  'X', 'Y', 'Z', '-', '.', ' ', '$', '/', '+', '%', 'a', 'b', 'c', 'd', '*'};
 
 /**
  * These represent the encodings of characters, as patterns of wide and narrow bars.
  * The 9 least-significant bits of each int correspond to the pattern of wide and narrow.
  */
-const int CODE93_CHARACTER_ENCODINGS[48] = {
+const int ZX_CODE93_CHARACTER_ENCODINGS[] = {
   0x114, 0x148, 0x144, 0x142, 0x128, 0x124, 0x122, 0x150, 0x112, 0x10A, // 0-9
   0x1A8, 0x1A4, 0x1A2, 0x194, 0x192, 0x18A, 0x168, 0x164, 0x162, 0x134, // A-J
   0x11A, 0x158, 0x14C, 0x146, 0x12C, 0x116, 0x1B4, 0x1B2, 0x1AC, 0x1A6, // K-T
@@ -36,171 +39,168 @@ const int CODE93_CHARACTER_ENCODINGS[48] = {
   0x126, 0x1DA, 0x1D6, 0x132, 0x15E, // Control chars? $-*
 };
 
-const int CODE93_ASTERISK_ENCODING = 0x15E;
+const int ZX_CODE93_ASTERISK_ENCODING = 0x15E;
 
 @interface ZXCode93Reader ()
 
-@property (nonatomic, strong) NSMutableString *decodeRowResult;
+@property (nonatomic, strong, readonly) ZXIntArray *counters;
 
 @end
 
 @implementation ZXCode93Reader
 
++ (void)initialize {
+  if ([self class] != [ZXCode93Reader class]) return;
+
+  ZX_CODE93_ALPHABET_STRING = [[NSString alloc] initWithCharacters:ZX_CODE93_ALPHABET
+                                                            length:sizeof(ZX_CODE93_ALPHABET) / sizeof(unichar)];
+}
+
 - (id)init {
   if (self = [super init]) {
-    _decodeRowResult = [NSMutableString stringWithCapacity:20];
+    _counters = [[ZXIntArray alloc] initWithLength:6];
   }
 
   return self;
 }
 
 - (ZXResult *)decodeRow:(int)rowNumber row:(ZXBitArray *)row hints:(ZXDecodeHints *)hints error:(NSError **)error {
-  const int countersLen = 6;
-  int counters[countersLen];
-  memset(counters, 0, countersLen * sizeof(int));
-
-  [self.decodeRowResult setString:@""];
-
-  int start[2] = {0};
-  if (![self findAsteriskPattern:row a:&start[0] b:&start[1]]) {
-    if (error) *error = NotFoundErrorInstance();
+  ZXIntArray *start = [self findAsteriskPattern:row];
+  if (!start) {
+    if (error) *error = ZXNotFoundErrorInstance();
     return nil;
   }
   // Read off white space
-  int nextStart = [row nextSet:start[1]];
+  int nextStart = [row nextSet:start.array[1]];
   int end = row.size;
+
+  ZXIntArray *theCounters = self.counters;
+  memset(theCounters.array, 0, theCounters.length * sizeof(int32_t));
+  NSMutableString *result = [NSMutableString string];
 
   unichar decodedChar;
   int lastStart;
   do {
-    if (![ZXOneDReader recordPattern:row start:nextStart counters:counters countersSize:countersLen]) {
-      if (error) *error = NotFoundErrorInstance();
+    if (![ZXOneDReader recordPattern:row start:nextStart counters:theCounters]) {
+      if (error) *error = ZXNotFoundErrorInstance();
       return nil;
     }
-    int pattern = [self toPattern:counters countersLen:countersLen];
+    int pattern = [self toPattern:theCounters];
     if (pattern < 0) {
-      if (error) *error = NotFoundErrorInstance();
+      if (error) *error = ZXNotFoundErrorInstance();
       return nil;
     }
     decodedChar = [self patternToChar:pattern];
     if (decodedChar == 0) {
-      if (error) *error = NotFoundErrorInstance();
+      if (error) *error = ZXNotFoundErrorInstance();
       return nil;
     }
-    [self.decodeRowResult appendFormat:@"%C", decodedChar];
+    [result appendFormat:@"%C", decodedChar];
     lastStart = nextStart;
-    for (int i = 0; i < countersLen; i++) {
-      nextStart += counters[i];
+    for (int i = 0; i < theCounters.length; i++) {
+      nextStart += theCounters.array[i];
     }
     // Read off white space
     nextStart = [row nextSet:nextStart];
   } while (decodedChar != '*');
-  [self.decodeRowResult deleteCharactersInRange:NSMakeRange([self.decodeRowResult length] - 1, 1)];
+  [result deleteCharactersInRange:NSMakeRange([result length] - 1, 1)]; // remove asterisk
 
+  int lastPatternSize = [theCounters sum];
+
+  // Should be at least one more black module
   if (nextStart == end || ![row get:nextStart]) {
-    if (error) *error = NotFoundErrorInstance();
+    if (error) *error = ZXNotFoundErrorInstance();
     return nil;
   }
 
-  if ([self.decodeRowResult length] < 2) {
+  if ([result length] < 2) {
     // false positive -- need at least 2 checksum digits
-    if (error) *error = NotFoundErrorInstance();
+    if (error) *error = ZXNotFoundErrorInstance();
     return nil;
   }
 
-  if (![self checkChecksums:self.decodeRowResult error:error]) {
+  if (![self checkChecksums:result error:error]) {
     return nil;
   }
-  [self.decodeRowResult deleteCharactersInRange:NSMakeRange([self.decodeRowResult length] - 2, 2)];
+  [result deleteCharactersInRange:NSMakeRange([result length] - 2, 2)];
 
-  NSString *resultString = [self decodeExtended:self.decodeRowResult];
+  NSString *resultString = [self decodeExtended:result];
   if (!resultString) {
-    if (error) *error = FormatErrorInstance();
+    if (error) *error = ZXFormatErrorInstance();
     return nil;
   }
 
-  float left = (float) (start[1] + start[0]) / 2.0f;
-  float right = (float) (nextStart + lastStart) / 2.0f;
+  float left = (float) (start.array[1] + start.array[0]) / 2.0f;
+  float right = lastStart + lastPatternSize / 2.0f;
   return [ZXResult resultWithText:resultString
                          rawBytes:nil
-                           length:0
                      resultPoints:@[[[ZXResultPoint alloc] initWithX:left y:(float)rowNumber],
                                     [[ZXResultPoint alloc] initWithX:right y:(float)rowNumber]]
                            format:kBarcodeFormatCode93];
 }
 
-- (BOOL)findAsteriskPattern:(ZXBitArray *)row a:(int *)a b:(int *)b {
+- (ZXIntArray *)findAsteriskPattern:(ZXBitArray *)row {
   int width = row.size;
   int rowOffset = [row nextSet:0];
 
-  int counterPosition = 0;
-
-  const int patternLength = 6;
-  int counters[patternLength];
-  memset(counters, 0, patternLength * sizeof(int));
-
+  [self.counters clear];
+  ZXIntArray *theCounters = self.counters;
   int patternStart = rowOffset;
   BOOL isWhite = NO;
+  int patternLength = theCounters.length;
 
+  int counterPosition = 0;
   for (int i = rowOffset; i < width; i++) {
     if ([row get:i] ^ isWhite) {
-      counters[counterPosition]++;
+      theCounters.array[counterPosition]++;
     } else {
       if (counterPosition == patternLength - 1) {
-        if ([self toPattern:counters countersLen:patternLength] == CODE93_ASTERISK_ENCODING) {
-          if (a) *a = patternStart;
-          if (b) *b = i;
-          return YES;
+        if ([self toPattern:theCounters] == ZX_CODE93_ASTERISK_ENCODING) {
+          return [[ZXIntArray alloc] initWithInts:patternStart, i, -1];
         }
-        patternStart += counters[0] + counters[1];
+        patternStart += theCounters.array[0] + theCounters.array[1];
         for (int y = 2; y < patternLength; y++) {
-          counters[y - 2] = counters[y];
+          theCounters.array[y - 2] = theCounters.array[y];
         }
-        counters[patternLength - 2] = 0;
-        counters[patternLength - 1] = 0;
+        theCounters.array[patternLength - 2] = 0;
+        theCounters.array[patternLength - 1] = 0;
         counterPosition--;
       } else {
         counterPosition++;
       }
-      counters[counterPosition] = 1;
+      theCounters.array[counterPosition] = 1;
       isWhite = !isWhite;
     }
   }
 
-  return NO;
+  return nil;
 }
 
-- (int)toPattern:(int *)counters countersLen:(unsigned int)countersLen {
-  int max = countersLen;
-  int sum = 0;
-  for (int i = 0; i < max; i++) {
-    sum += counters[i];
-  }
+- (int)toPattern:(ZXIntArray *)counters {
+  int max = counters.length;
+  int sum = [counters sum];
+  int32_t *array = counters.array;
   int pattern = 0;
   for (int i = 0; i < max; i++) {
-    int scaledShifted = (counters[i] << INTEGER_MATH_SHIFT) * 9 / sum;
-    int scaledUnshifted = scaledShifted >> INTEGER_MATH_SHIFT;
-    if ((scaledShifted & 0xFF) > 0x7F) {
-      scaledUnshifted++;
-    }
-    if (scaledUnshifted < 1 || scaledUnshifted > 4) {
+    int scaled = round(array[i] * 9.0f / sum);
+    if (scaled < 1 || scaled > 4) {
       return -1;
     }
     if ((i & 0x01) == 0) {
-      for (int j = 0; j < scaledUnshifted; j++) {
+      for (int j = 0; j < scaled; j++) {
         pattern = (pattern << 1) | 0x01;
       }
     } else {
-      pattern <<= scaledUnshifted;
+      pattern <<= scaled;
     }
   }
   return pattern;
 }
 
 - (unichar)patternToChar:(int)pattern {
-  for (int i = 0; i < sizeof(CODE93_CHARACTER_ENCODINGS) / sizeof(int); i++) {
-    if (CODE93_CHARACTER_ENCODINGS[i] == pattern) {
-      return CODE93_ALPHABET[i];
+  for (int i = 0; i < sizeof(ZX_CODE93_CHARACTER_ENCODINGS) / sizeof(int); i++) {
+    if (ZX_CODE93_CHARACTER_ENCODINGS[i] == pattern) {
+      return ZX_CODE93_ALPHABET[i];
     }
   }
 
@@ -275,14 +275,14 @@ const int CODE93_ASTERISK_ENCODING = 0x15E;
   int total = 0;
 
   for (int i = checkPosition - 1; i >= 0; i--) {
-    total += weight * [CODE93_ALPHABET_STRING rangeOfString:[NSString stringWithFormat:@"%C", [result characterAtIndex:i]]].location;
+    total += weight * [ZX_CODE93_ALPHABET_STRING rangeOfString:[NSString stringWithFormat:@"%C", [result characterAtIndex:i]]].location;
     if (++weight > weightMax) {
       weight = 1;
     }
   }
 
-  if ([result characterAtIndex:checkPosition] != CODE93_ALPHABET[total % 47]) {
-    if (error) *error = ChecksumErrorInstance();
+  if ([result characterAtIndex:checkPosition] != ZX_CODE93_ALPHABET[total % 47]) {
+    if (error) *error = ZXChecksumErrorInstance();
     return NO;
   }
   return YES;

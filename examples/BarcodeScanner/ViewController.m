@@ -29,6 +29,10 @@
 
 #pragma mark - View Controller Methods
 
+- (void)dealloc {
+  [self.capture.layer removeFromSuperlayer];
+}
+
 - (void)viewDidLoad {
   [super viewDidLoad];
 
@@ -49,7 +53,9 @@
 
   self.capture.delegate = self;
   self.capture.layer.frame = self.view.bounds;
-  self.capture.scanRect = self.scanRectView.frame;
+
+  CGAffineTransform captureSizeTransform = CGAffineTransformMakeScale(320 / self.view.frame.size.width, 480 / self.view.frame.size.height);
+  self.capture.scanRect = CGRectApplyAffineTransform(self.scanRectView.frame, captureSizeTransform);
 }
 
 - (BOOL)shouldAutorotateToInterfaceOrientation:(UIInterfaceOrientation)toInterfaceOrientation {
@@ -125,6 +131,12 @@
 
   // Vibrate
   AudioServicesPlaySystemSound(kSystemSoundID_Vibrate);
+
+  [self.capture stop];
+
+  dispatch_after(dispatch_time(DISPATCH_TIME_NOW, 2 * NSEC_PER_SEC), dispatch_get_main_queue(), ^{
+    [self.capture start];
+  });
 }
 
 @end

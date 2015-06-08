@@ -14,14 +14,17 @@
  * limitations under the License.
  */
 
+#import "ZXResultParser.h"
 #import "ZXURIParsedResult.h"
 
-static NSRegularExpression *USER_IN_HOST = nil;
+static NSRegularExpression *ZX_USER_IN_HOST = nil;
 
 @implementation ZXURIParsedResult
 
 + (void)initialize {
-  USER_IN_HOST = [[NSRegularExpression alloc] initWithPattern:@":/*([^/@]+)@[^/]+" options:0 error:nil];
+  if ([self class] != [ZXURIParsedResult class]) return;
+
+  ZX_USER_IN_HOST = [[NSRegularExpression alloc] initWithPattern:@":/*([^/@]+)@[^/]+" options:0 error:nil];
 }
 
 - (id)initWithUri:(NSString *)uri title:(NSString *)title {
@@ -37,16 +40,8 @@ static NSRegularExpression *USER_IN_HOST = nil;
   return [[self alloc] initWithUri:uri title:title];
 }
 
-/**
- * Returns true if the URI contains suspicious patterns that may suggest it intends to
- * mislead the user about its true nature. At the moment this looks for the presence
- * of user/password syntax in the host/authority portion of a URI which may be used
- * in attempts to make the URI's host appear to be other than it is. Example:
- * http://yourbank.com@phisher.com  This URI connects to phisher.com but may appear
- * to connect to yourbank.com at first glance.
- */
 - (BOOL)possiblyMaliciousURI {
-  return [USER_IN_HOST numberOfMatchesInString:self.uri options:0 range:NSMakeRange(0, self.uri.length)] > 0;
+  return [ZX_USER_IN_HOST numberOfMatchesInString:self.uri options:0 range:NSMakeRange(0, self.uri.length)] > 0;
 }
 
 - (NSString *)displayResult {
@@ -73,22 +68,13 @@ static NSRegularExpression *USER_IN_HOST = nil;
   return massagedUri;
 }
 
-- (BOOL)isColonFollowedByPortNumber:(NSString *)aUri protocolEnd:(int)protocolEnd {
-  NSUInteger nextSlash = [aUri rangeOfString:@"/" options:0 range:NSMakeRange(protocolEnd + 1, [aUri length] - protocolEnd - 1)].location;
+- (BOOL)isColonFollowedByPortNumber:(NSString *)uri protocolEnd:(int)protocolEnd {
+  int start = protocolEnd + 1;
+  NSUInteger nextSlash = [uri rangeOfString:@"/" options:0 range:NSMakeRange(start, [uri length] - start)].location;
   if (nextSlash == NSNotFound) {
-    nextSlash = [aUri length];
+    nextSlash = [uri length];
   }
-  if (nextSlash <= protocolEnd + 1) {
-    return NO;
-  }
-
-  for (int x = protocolEnd + 1; x < nextSlash; x++) {
-    if ([aUri characterAtIndex:x] < '0' || [aUri characterAtIndex:x] > '9') {
-      return NO;
-    }
-  }
-
-  return YES;
+  return [ZXResultParser isSubstringOfDigits:uri offset:start length:(int)nextSlash - start];
 }
 
 @end

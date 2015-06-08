@@ -18,39 +18,43 @@
 #import "ZXAztecEncoder.h"
 #import "ZXAztecWriter.h"
 #import "ZXBitMatrix.h"
+#import "ZXByteArray.h"
 #import "ZXEncodeHints.h"
 
-const NSStringEncoding ZX_DEFAULT_AZTEC_ENCODING = NSISOLatin1StringEncoding;
+const NSStringEncoding ZX_AZTEC_DEFAULT_ENCODING = NSISOLatin1StringEncoding;
 
 @implementation ZXAztecWriter
 
 - (ZXBitMatrix *)encode:(NSString *)contents format:(ZXBarcodeFormat)format width:(int)width height:(int)height error:(NSError **)error {
-  return [self encode:contents format:format width:width height:height encoding:ZX_DEFAULT_AZTEC_ENCODING eccPercent:ZX_DEFAULT_AZTEC_EC_PERCENT];
+  return [self encode:contents format:format width:width height:height hints:nil error:error];
 }
 
 - (ZXBitMatrix *)encode:(NSString *)contents format:(ZXBarcodeFormat)format width:(int)width height:(int)height hints:(ZXEncodeHints *)hints error:(NSError **)error {
   NSStringEncoding encoding = hints.encoding;
   NSNumber *eccPercent = hints.errorCorrectionPercent;
+  NSNumber *layers = hints.aztecLayers;
 
   return [self encode:contents
                format:format
-               width:width
+                width:width
                height:height
-             encoding:encoding == 0 ? ZX_DEFAULT_AZTEC_ENCODING : encoding
-           eccPercent:eccPercent == nil ? ZX_DEFAULT_AZTEC_EC_PERCENT : [eccPercent intValue]];
+             encoding:encoding == 0 ? ZX_AZTEC_DEFAULT_ENCODING : encoding
+           eccPercent:eccPercent == nil ? ZX_AZTEC_DEFAULT_EC_PERCENT : [eccPercent intValue]
+               layers:layers == nil ? ZX_AZTEC_DEFAULT_LAYERS : [layers intValue]];
 }
 
-- (ZXBitMatrix *)encode:(NSString *)contents format:(ZXBarcodeFormat)format width:(int)width height:(int)height encoding:(NSStringEncoding)encoding eccPercent:(int)eccPercent {
+- (ZXBitMatrix *)encode:(NSString *)contents format:(ZXBarcodeFormat)format width:(int)width
+                 height:(int)height encoding:(NSStringEncoding)encoding eccPercent:(int)eccPercent layers:(int)layers {
   if (format != kBarcodeFormatAztec) {
     @throw [NSException exceptionWithName:NSInvalidArgumentException
                                    reason:[NSString stringWithFormat:@"Can only encode kBarcodeFormatAztec (%d), but got %d", kBarcodeFormatAztec, format]
                                  userInfo:nil];
   }
-  NSData *contentsData = [contents dataUsingEncoding:encoding];
-  int8_t *bytes = (int8_t *)[contentsData bytes];
-  NSUInteger bytesLen = [contentsData length];
 
-  ZXAztecCode *aztec = [ZXAztecEncoder encode:bytes len:(int)bytesLen minECCPercent:eccPercent];
+  NSData *data = [contents dataUsingEncoding:encoding];
+  ZXByteArray *bytes = [[ZXByteArray alloc] initWithLength:(unsigned int)[data length]];
+  memcpy(bytes.array, [data bytes], bytes.length * sizeof(int8_t));
+  ZXAztecCode *aztec = [ZXAztecEncoder encode:bytes minECCPercent:eccPercent userSpecifiedLayers:layers];
   return [self renderResult:aztec width:width height:height];
 }
 
@@ -79,7 +83,6 @@ const NSStringEncoding ZX_DEFAULT_AZTEC_ENCODING = NSISOLatin1StringEncoding;
       }
     }
   }
-
   return output;
 }
 

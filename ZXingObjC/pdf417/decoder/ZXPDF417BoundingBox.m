@@ -20,7 +20,7 @@
 
 @interface ZXPDF417BoundingBox ()
 
-@property (nonatomic, strong) ZXBitMatrix *image;
+@property (nonatomic, strong, readonly) ZXBitMatrix *image;
 @property (nonatomic, assign) int minX;
 @property (nonatomic, assign) int maxX;
 @property (nonatomic, assign) int minY;
@@ -120,6 +120,7 @@
   self.maxY = (int) MAX(self.bottomLeft.y, self.bottomRight.y);
 }
 
+/*
 - (void)setTopRight:(ZXResultPoint *)topRight {
   _topRight = topRight;
   [self calculateMinMaxValues];
@@ -129,5 +130,6 @@
   _bottomRight = bottomRight;
   [self calculateMinMaxValues];
 }
+*/
 
 @end

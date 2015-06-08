@@ -21,7 +21,7 @@
 
 @interface ZXUPCAReader ()
 
-@property (nonatomic, strong) ZXUPCEANReader *ean13Reader;
+@property (nonatomic, strong, readonly) ZXUPCEANReader *ean13Reader;
 
 @end
 
@@ -40,7 +40,7 @@
   if (result) {
     result = [self maybeReturnResult:result];
     if (!result) {
-      if (error) *error = FormatErrorInstance();
+      if (error) *error = ZXFormatErrorInstance();
       return nil;
     }
     return result;
@@ -54,7 +54,7 @@
   if (result) {
     result = [self maybeReturnResult:result];
     if (!result) {
-      if (error) *error = FormatErrorInstance();
+      if (error) *error = ZXFormatErrorInstance();
       return nil;
     }
     return result;
@@ -68,7 +68,7 @@
   if (result) {
     result = [self maybeReturnResult:result];
     if (!result) {
-      if (error) *error = FormatErrorInstance();
+      if (error) *error = ZXFormatErrorInstance();
       return nil;
     }
     return result;
@@ -82,7 +82,7 @@
   if (result) {
     result = [self maybeReturnResult:result];
     if (!result) {
-      if (error) *error = FormatErrorInstance();
+      if (error) *error = ZXFormatErrorInstance();
       return nil;
     }
     return result;
@@ -103,8 +103,7 @@
   NSString *text = result.text;
   if ([text characterAtIndex:0] == '0') {
     return [ZXResult resultWithText:[text substringFromIndex:1]
-                           rawBytes:NULL
-                             length:0
+                           rawBytes:nil
                        resultPoints:result.resultPoints
                              format:kBarcodeFormatUPCA];
   } else {

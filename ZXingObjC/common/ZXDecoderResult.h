@@ -14,27 +14,32 @@
  * limitations under the License.
  */
 
+@class ZXByteArray;
+
 /**
  * Encapsulates the result of decoding a matrix of bits. This typically
  * applies to 2D barcode formats. For now it contains the raw bytes obtained,
  * as well as a String interpretation of those bytes, if applicable.
  */
-
 @interface ZXDecoderResult : NSObject
 
-@property (nonatomic, assign, readonly) int8_t *rawBytes;
-@property (nonatomic, assign, readonly) int length;
+@property (nonatomic, strong, readonly) ZXByteArray *rawBytes;
 @property (nonatomic, copy, readonly) NSString *text;
 @property (nonatomic, strong, readonly) NSMutableArray *byteSegments;
 @property (nonatomic, copy, readonly) NSString *ecLevel;
 @property (nonatomic, copy) NSNumber *errorsCorrected;
 @property (nonatomic, copy) NSNumber *erasures;
 @property (nonatomic, strong) id other;
+@property (nonatomic, assign, readonly) int structuredAppendParity;
+@property (nonatomic, assign, readonly) int structuredAppendSequenceNumber;
 
-- (id)initWithRawBytes:(int8_t *)rawBytes
-                length:(unsigned int)length
-                  text:(NSString *)text
-          byteSegments:(NSMutableArray *)byteSegments
-               ecLevel:(NSString *)ecLevel;
+- (id)initWithRawBytes:(ZXByteArray *)rawBytes text:(NSString *)text
+          byteSegments:(NSMutableArray *)byteSegments ecLevel:(NSString *)ecLevel;
+
+- (id)initWithRawBytes:(ZXByteArray *)rawBytes text:(NSString *)text
+          byteSegments:(NSMutableArray *)byteSegments ecLevel:(NSString *)ecLevel
+            saSequence:(int)saSequence saParity:(int)saParity;
+
+- (BOOL)hasStructuredAppend;
 
 @end

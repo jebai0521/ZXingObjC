@@ -14,10 +14,12 @@
  * limitations under the License.
  */
 
+#import "ZXIntArray.h"
 #import "ZXRSSUtils.h"
 
 @implementation ZXRSSUtils
 
+/*
 + (NSArray *)rssWidths:(int)val n:(int)n elements:(int)elements maxWidth:(int)maxWidth noNarrow:(BOOL)noNarrow {
   NSMutableArray *widths = [NSMutableArray arrayWithCapacity:elements];
   int bar;
@@ -55,19 +57,20 @@
   [widths addObject:@(n)];
   return widths;
 }
+*/
 
-+ (int)rssValue:(int *)widths widthsLen:(unsigned int)widthsLen maxWidth:(int)maxWidth noNarrow:(BOOL)noNarrow {
-  int elements = widthsLen;
++ (int)rssValue:(ZXIntArray *)widths maxWidth:(int)maxWidth noNarrow:(BOOL)noNarrow {
+  int elements = widths.length;
   int n = 0;
   for (int i = 0; i < elements; i++) {
-    n += widths[i];
+    n += widths.array[i];
   }
   int val = 0;
   int narrowMask = 0;
   for (int bar = 0; bar < elements - 1; bar++) {
     int elmWidth;
     for (elmWidth = 1, narrowMask |= 1 << bar;
-         elmWidth < widths[bar];
+         elmWidth < widths.array[bar];
          elmWidth++, narrowMask &= ~(1 << bar)) {
       int subVal = [self combins:n - elmWidth - 1 r:elements - bar - 2];
       if (noNarrow && (narrowMask == 0) &&
@@ -119,16 +122,17 @@
   return val;
 }
 
+/*
 + (NSArray *)elements:(NSArray *)eDist N:(int)N K:(int)K {
   NSMutableArray *widths = [NSMutableArray arrayWithCapacity:[eDist count] + 2];
-  int twoK = K << 1;
+  int twoK = 2 * K;
   [widths addObject:@1];
   int i;
   int minEven = 10;
   int barSum = 1;
   for (i = 1; i < twoK - 2; i += 2) {
     [widths addObject:@([eDist[i - 1] intValue] - [widths[i - 1] intValue])];
-    [widths addObject:@([eDist[i] intValue] - [widths[i] intValue])];    
+    [widths addObject:@([eDist[i] intValue] - [widths[i] intValue])];
     barSum += [widths[i] intValue] + [widths[i + 1] intValue];
     if ([widths[i] intValue] < minEven) {
       minEven = [widths[i] intValue];
@@ -147,5 +151,6 @@
   }
   return widths;
 }
+*/
 
 @end

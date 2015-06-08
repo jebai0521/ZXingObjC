@@ -26,6 +26,10 @@
 
 #pragma mark - NSDocument Methods
 
+- (void)dealloc {
+  [self.capture.layer removeFromSuperlayer];
+}
+
 - (NSString *)windowNibName {
 	return @"BarcodeScannerDocument";
 }
@@ -102,7 +106,7 @@
 
     case kBarcodeFormatUPCEANExtension:
       return @"UPC/EAN extension";
-      
+
     default:
       return @"Unknown";
   }

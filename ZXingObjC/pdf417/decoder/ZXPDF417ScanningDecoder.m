@@ -16,6 +16,8 @@
 
 #import "ZXBitMatrix.h"
 #import "ZXDecoderResult.h"
+#import "ZXErrors.h"
+#import "ZXIntArray.h"
 #import "ZXPDF417BarcodeMetadata.h"
 #import "ZXPDF417BarcodeValue.h"
 #import "ZXPDF417BoundingBox.h"
@@ -29,15 +31,17 @@
 #import "ZXPDF417ScanningDecoder.h"
 #import "ZXResultPoint.h"
 
-const int ZXPDF417_CODEWORD_SKEW_SIZE = 2;
+const int ZX_PDF417_CODEWORD_SKEW_SIZE = 2;
 
-const int ZXPDF417_MAX_ERRORS = 3;
-const int ZXPDF417_MAX_EC_CODEWORDS = 512;
+const int ZX_PDF417_MAX_ERRORS = 3;
+const int ZX_PDF417_MAX_EC_CODEWORDS = 512;
 static ZXPDF417ECErrorCorrection *errorCorrection;
 
 @implementation ZXPDF417ScanningDecoder
 
 + (void)initialize {
+  if ([self class] != [ZXPDF417ScanningDecoder class]) return;
+
   errorCorrection = [[ZXPDF417ECErrorCorrection alloc] init];
 }
 
@@ -51,7 +55,8 @@ static ZXPDF417ECErrorCorrection *errorCorrection;
               imageTopRight:(ZXResultPoint *)imageTopRight
            imageBottomRight:(ZXResultPoint *)imageBottomRight
            minCodewordWidth:(int)minCodewordWidth
-           maxCodewordWidth:(int)maxCodewordWidth {
+           maxCodewordWidth:(int)maxCodewordWidth
+                      error:(NSError **)error {
   ZXPDF417BoundingBox *boundingBox = [[ZXPDF417BoundingBox alloc] initWithImage:image topLeft:imageTopLeft bottomLeft:imageBottomLeft topRight:imageTopRight bottomRight:imageBottomRight];
   ZXPDF417DetectionResultRowIndicatorColumn *leftRowIndicatorColumn;
   ZXPDF417DetectionResultRowIndicatorColumn *rightRowIndicatorColumn;
@@ -65,7 +70,7 @@ static ZXPDF417ECErrorCorrection *errorCorrection;
       rightRowIndicatorColumn = [self rowIndicatorColumn:image boundingBox:boundingBox startPoint:imageTopRight leftToRight:NO
                                         minCodewordWidth:minCodewordWidth maxCodewordWidth:maxCodewordWidth];
     }
-    detectionResult = [self merge:leftRowIndicatorColumn rightRowIndicatorColumn:rightRowIndicatorColumn];
+    detectionResult = [self merge:leftRowIndicatorColumn rightRowIndicatorColumn:rightRowIndicatorColumn error:error];
     if (!detectionResult) {
       return nil;
     }
@@ -117,11 +122,12 @@ static ZXPDF417ECErrorCorrection *errorCorrection;
       }
     }
   }
-  return [self createDecoderResult:detectionResult];
+  return [self createDecoderResult:detectionResult error:error];
 }
 
 + (ZXPDF417DetectionResult *)merge:(ZXPDF417DetectionResultRowIndicatorColumn *)leftRowIndicatorColumn
-           rightRowIndicatorColumn:(ZXPDF417DetectionResultRowIndicatorColumn *)rightRowIndicatorColumn {
+           rightRowIndicatorColumn:(ZXPDF417DetectionResultRowIndicatorColumn *)rightRowIndicatorColumn
+                             error:(NSError **)error {
   if (!leftRowIndicatorColumn && !rightRowIndicatorColumn) {
     return nil;
   }
@@ -129,21 +135,45 @@ static ZXPDF417ECErrorCorrection *errorCorrection;
   if (!barcodeMetadata) {
     return nil;
   }
-  ZXPDF417BoundingBox *boundingBox = [ZXPDF417BoundingBox mergeLeftBox:[self adjustBoundingBox:leftRowIndicatorColumn]
-                                                              rightBox:[self adjustBoundingBox:rightRowIndicatorColumn]];
+  ZXPDF417BoundingBox *leftBoundingBox, *rightBoundingBox;
+  if (![self adjustBoundingBox:&leftBoundingBox rowIndicatorColumn:leftRowIndicatorColumn error:error]) {
+    return nil;
+  }
+  if (![self adjustBoundingBox:&rightBoundingBox rowIndicatorColumn:rightRowIndicatorColumn error:error]) {
+    return nil;
+  }
+
+  ZXPDF417BoundingBox *boundingBox = [ZXPDF417BoundingBox mergeLeftBox:leftBoundingBox rightBox:rightBoundingBox];
+  if (!boundingBox) {
+    if (error) *error = ZXNotFoundErrorInstance();
+    return nil;
+  }
   return [[ZXPDF417DetectionResult alloc] initWithBarcodeMetadata:barcodeMetadata boundingBox:boundingBox];
 }
 
-+ (ZXPDF417BoundingBox *)adjustBoundingBox:(ZXPDF417DetectionResultRowIndicatorColumn *)rowIndicatorColumn {
++ (BOOL)adjustBoundingBox:(ZXPDF417BoundingBox **)boundingBox
+       rowIndicatorColumn:(ZXPDF417DetectionResultRowIndicatorColumn *)rowIndicatorColumn
+                    error:(NSError **)error {
   if (!rowIndicatorColumn) {
-    return nil;
+    *boundingBox = nil;
+    return YES;
   }
-  NSArray *rowHeights = [rowIndicatorColumn rowHeights];
+  ZXIntArray *rowHeights;
+  if (![rowIndicatorColumn getRowHeights:&rowHeights]) {
+    if (error) *error = ZXFormatErrorInstance();
+    *boundingBox = nil;
+    return NO;
+  }
+  if (!rowHeights) {
+    *boundingBox = nil;
+    return YES;
+  }
   int maxRowHeight = [self max:rowHeights];
   int missingStartRows = 0;
-  for (NSNumber *rowHeight in rowHeights) {
-    missingStartRows += maxRowHeight - [rowHeight intValue];
-    if ([rowHeight intValue] > 0) {
+  for (int i = 0; i < rowHeights.length; i++) {
+    int rowHeight = rowHeights.array[i];
+    missingStartRows += maxRowHeight - rowHeight;
+    if (rowHeight > 0) {
       break;
     }
   }
@@ -152,37 +182,42 @@ static ZXPDF417ECErrorCorrection *errorCorrection;
     missingStartRows--;
   }
   int missingEndRows = 0;
-  for (int row = (int)[rowHeights count] - 1; row >= 0; row--) {
-    missingEndRows += maxRowHeight - [rowHeights[row] intValue];
-    if ([rowHeights[row] intValue] > 0) {
+  for (int row = rowHeights.length - 1; row >= 0; row--) {
+    missingEndRows += maxRowHeight - rowHeights.array[row];
+    if (rowHeights.array[row] > 0) {
       break;
     }
   }
   for (int row = (int)[codewords count] - 1; missingEndRows > 0 && codewords[row] == [NSNull null]; row--) {
     missingEndRows--;
   }
-  return [rowIndicatorColumn.boundingBox addMissingRows:missingStartRows missingEndRows:missingEndRows
-                                          isLeft:rowIndicatorColumn.isLeft];
+  *boundingBox = [rowIndicatorColumn.boundingBox addMissingRows:missingStartRows
+                                                 missingEndRows:missingEndRows
+                                                         isLeft:rowIndicatorColumn.isLeft];
+  return *boundingBox != nil;
 }
 
-+ (int)max:(NSArray *)values {
++ (int)max:(ZXIntArray *)values {
   int maxValue = -1;
-  for (NSNumber *value in values) {
-    maxValue = MAX(maxValue, [value intValue]);
+  for (int i = 0; i < values.length; i++) {
+    int value = values.array[i];
+    maxValue = MAX(maxValue, value);
   }
   return maxValue;
 }
 
 + (ZXPDF417BarcodeMetadata *)barcodeMetadata:(ZXPDF417DetectionResultRowIndicatorColumn *)leftRowIndicatorColumn
                      rightRowIndicatorColumn:(ZXPDF417DetectionResultRowIndicatorColumn *)rightRowIndicatorColumn {
-  if (!leftRowIndicatorColumn || !leftRowIndicatorColumn.barcodeMetadata) {
+  ZXPDF417BarcodeMetadata *leftBarcodeMetadata;
+  if (!leftRowIndicatorColumn ||
+      !(leftBarcodeMetadata = leftRowIndicatorColumn.barcodeMetadata)) {
     return rightRowIndicatorColumn ? rightRowIndicatorColumn.barcodeMetadata : nil;
   }
-  if (!rightRowIndicatorColumn || !rightRowIndicatorColumn.barcodeMetadata) {
-    return leftRowIndicatorColumn ? leftRowIndicatorColumn.barcodeMetadata : nil;
+  ZXPDF417BarcodeMetadata *rightBarcodeMetadata;
+  if (!rightRowIndicatorColumn ||
+      !(rightBarcodeMetadata = rightRowIndicatorColumn.barcodeMetadata)) {
+    return leftRowIndicatorColumn.barcodeMetadata;
   }
-  ZXPDF417BarcodeMetadata *leftBarcodeMetadata = leftRowIndicatorColumn.barcodeMetadata;
-  ZXPDF417BarcodeMetadata *rightBarcodeMetadata = rightRowIndicatorColumn.barcodeMetadata;
 
   if (leftBarcodeMetadata.columnCount != rightBarcodeMetadata.columnCount &&
       leftBarcodeMetadata.errorCorrectionLevel != rightBarcodeMetadata.errorCorrectionLevel &&
@@ -221,15 +256,15 @@ static ZXPDF417ECErrorCorrection *errorCorrection;
 }
 
 + (BOOL)adjustCodewordCount:(ZXPDF417DetectionResult *)detectionResult barcodeMatrix:(NSArray *)barcodeMatrix {
-  NSArray *numberOfCodewords = [(ZXPDF417BarcodeValue *)barcodeMatrix[0][1] value];
+  ZXIntArray *numberOfCodewords = [(ZXPDF417BarcodeValue *)barcodeMatrix[0][1] value];
   int calculatedNumberOfCodewords = [detectionResult barcodeColumnCount] * [detectionResult barcodeRowCount];
     [self numberOfECCodeWords:detectionResult.barcodeECLevel];
-  if ([numberOfCodewords count] == 0) {
-    if (calculatedNumberOfCodewords < 1 || calculatedNumberOfCodewords > ZXPDF417_MAX_CODEWORDS_IN_BARCODE) {
+  if (numberOfCodewords.length == 0) {
+    if (calculatedNumberOfCodewords < 1 || calculatedNumberOfCodewords > ZX_PDF417_MAX_CODEWORDS_IN_BARCODE) {
       return NO;
     }
     [(ZXPDF417BarcodeValue *)barcodeMatrix[0][1] setValue:calculatedNumberOfCodewords];
-  } else if ([numberOfCodewords[0] intValue] != calculatedNumberOfCodewords) {
+  } else if (numberOfCodewords.array[0] != calculatedNumberOfCodewords) {
     // The calculated one is more reliable as it is derived from the row indicator columns
     [(ZXPDF417BarcodeValue *)barcodeMatrix[0][1] setValue:calculatedNumberOfCodewords];
   }
@@ -237,39 +272,40 @@ static ZXPDF417ECErrorCorrection *errorCorrection;
   return YES;
 }
 
-+ (ZXDecoderResult *)createDecoderResult:(ZXPDF417DetectionResult *)detectionResult {
++ (ZXDecoderResult *)createDecoderResult:(ZXPDF417DetectionResult *)detectionResult error:(NSError **)error {
   NSArray *barcodeMatrix = [self createBarcodeMatrix:detectionResult];
+  if (!barcodeMatrix) {
+    if (error) *error = ZXFormatErrorInstance();
+    return nil;
+  }
   if (![self adjustCodewordCount:detectionResult barcodeMatrix:barcodeMatrix]) {
+    if (error) *error = ZXNotFoundErrorInstance();
     return nil;
   }
   NSMutableArray *erasures = [NSMutableArray array];
-  NSMutableArray *codewords = [NSMutableArray array];
-  for (int i = 0; i < detectionResult.barcodeRowCount * detectionResult.barcodeColumnCount; i++) {
-    [codewords addObject:@0];
-  }
+  ZXIntArray *codewords = [[ZXIntArray alloc] initWithLength:detectionResult.barcodeRowCount * detectionResult.barcodeColumnCount];
   NSMutableArray *ambiguousIndexValuesList = [NSMutableArray array];
   NSMutableArray *ambiguousIndexesList = [NSMutableArray array];
   for (int row = 0; row < detectionResult.barcodeRowCount; row++) {
     for (int column = 0; column < detectionResult.barcodeColumnCount; column++) {
-      NSArray *values = [(ZXPDF417BarcodeValue *)barcodeMatrix[row][column + 1] value];
+      ZXIntArray *values = [(ZXPDF417BarcodeValue *)barcodeMatrix[row][column + 1] value];
       int codewordIndex = row * detectionResult.barcodeColumnCount + column;
-      if ([values count] == 0) {
+      if (values.length == 0) {
         [erasures addObject:@(codewordIndex)];
-      } else if ([values count] == 1) {
-        [codewords replaceObjectAtIndex:codewordIndex withObject:values[0]];
+      } else if (values.length == 1) {
+        codewords.array[codewordIndex] = values.array[0];
       } else {
         [ambiguousIndexesList addObject:@(codewordIndex)];
         [ambiguousIndexValuesList addObject:values];
       }
     }
   }
-  NSMutableArray *ambiguousIndexValues = [NSMutableArray array];
-  for (int i = 0; i < [ambiguousIndexValuesList count]; i++) {
-    ambiguousIndexValues[i] = ambiguousIndexValuesList[i];
-  }
-  return [self createDecoderResultFromAmbiguousValues:detectionResult.barcodeECLevel codewords:codewords
-                                         erasureArray:erasures ambiguousIndexes:ambiguousIndexesList
-                                 ambiguousIndexValues:ambiguousIndexValues];
+  return [self createDecoderResultFromAmbiguousValues:detectionResult.barcodeECLevel
+                                            codewords:codewords
+                                         erasureArray:[ZXPDF417Common toIntArray:erasures]
+                                     ambiguousIndexes:[ZXPDF417Common toIntArray:ambiguousIndexesList]
+                                 ambiguousIndexValues:ambiguousIndexValuesList
+                                                error:error];
 }
 
 /**
@@ -279,38 +315,53 @@ static ZXPDF417ECErrorCorrection *errorCorrection;
  * the ambiguous values to choose. We try decode using the first value, and if that fails, we use another of the
  * ambiguous values and try to decode again. This usually only happens on very hard to read and decode barcodes,
  * so decoding the normal barcodes is not affected by this.
+ *
+ * @param erasureArray contains the indexes of erasures
+ * @param ambiguousIndexes array with the indexes that have more than one most likely value
+ * @param ambiguousIndexValues two dimensional array that contains the ambiguous values. The first dimension must
+ * be the same length as the ambiguousIndexes array
  */
-+ (ZXDecoderResult *)createDecoderResultFromAmbiguousValues:(int)ecLevel codewords:(NSMutableArray *)codewords
-                                               erasureArray:(NSArray *)erasureArray ambiguousIndexes:(NSArray *)ambiguousIndexes
-                                       ambiguousIndexValues:(NSArray *)ambiguousIndexValues {
-  int ambiguousIndexCount[[ambiguousIndexes count]];
-  memset(ambiguousIndexCount, 0, [ambiguousIndexes count] * sizeof(int));
++ (ZXDecoderResult *)createDecoderResultFromAmbiguousValues:(int)ecLevel
+                                                  codewords:(ZXIntArray *)codewords
+                                               erasureArray:(ZXIntArray *)erasureArray
+                                           ambiguousIndexes:(ZXIntArray *)ambiguousIndexes
+                                       ambiguousIndexValues:(NSArray *)ambiguousIndexValues
+                                                      error:(NSError **)error {
+  ZXIntArray *ambiguousIndexCount = [[ZXIntArray alloc] initWithLength:ambiguousIndexes.length];
 
   int tries = 100;
   while (tries-- > 0) {
-    for (int i = 0; i < [ambiguousIndexes count]; i++) {
-      codewords[[ambiguousIndexes[i] intValue]] = ambiguousIndexValues[i][(ambiguousIndexCount[i] + 1) % [(NSArray *)ambiguousIndexValues[i] count]];
+    for (int i = 0; i < ambiguousIndexCount.length; i++) {
+      ZXIntArray *a = ambiguousIndexValues[i];
+      codewords.array[ambiguousIndexes.array[i]] = a.array[(ambiguousIndexCount.array[i] + 1) % [(ZXIntArray *)ambiguousIndexValues[i] length]];
     }
-    ZXDecoderResult *result = [self decodeCodewords:codewords ecLevel:ecLevel erasures:erasureArray];
+    NSError *e;
+    ZXDecoderResult *result = [self decodeCodewords:codewords ecLevel:ecLevel erasures:erasureArray error:&e];
     if (result) {
       return result;
-    }
-
-    if ([ambiguousIndexes count] == 0) {
+    } else if (e.code != ZXChecksumError) {
+      if (error) *error = e;
       return nil;
     }
-    for (int i = 0; i < [ambiguousIndexes count]; i++) {
-      if (ambiguousIndexCount[i] < [(NSArray *)ambiguousIndexValues[i] count] - 1) {
-        ambiguousIndexCount[i]++;
+    if (ambiguousIndexCount.length == 0) {
+      if (error) *error = ZXChecksumErrorInstance();
+      return nil;
+    }
+    for (int i = 0; i < ambiguousIndexCount.length; i++) {
+      if (ambiguousIndexCount.array[i] < [(ZXIntArray *)ambiguousIndexValues[i] length] - 1) {
+        ambiguousIndexCount.array[i]++;
         break;
       } else {
-        ambiguousIndexCount[i] = 0;
-        if (i == [ambiguousIndexes count] - 1) {
+        ambiguousIndexCount.array[i] = 0;
+        if (i == ambiguousIndexes.length - 1) {
+          if (error) *error = ZXChecksumErrorInstance();
           return nil;
         }
       }
     }
   }
+
+  if (error) *error = ZXChecksumErrorInstance();
   return nil;
 }
 
@@ -323,19 +374,24 @@ static ZXPDF417ECErrorCorrection *errorCorrection;
     }
   }
 
-  int column = -1;
+  int column = 0;
   for (ZXPDF417DetectionResultColumn *detectionResultColumn in [detectionResult detectionResultColumns]) {
-    column++;
-    if ((id)detectionResultColumn == [NSNull null]) {
-      continue;
-    }
-    for (ZXPDF417Codeword *codeword in detectionResultColumn.codewords) {
-      if ((id)codeword == [NSNull null] || codeword.rowNumber == -1) {
-        continue;
+    if ((id)detectionResultColumn != [NSNull null]) {
+      for (ZXPDF417Codeword *codeword in detectionResultColumn.codewords) {
+        if ((id)codeword != [NSNull null]) {
+          int rowNumber = codeword.rowNumber;
+          if (rowNumber >= 0) {
+            if (rowNumber >= barcodeMatrix.count) {
+              return nil;
+            }
+            [(ZXPDF417BarcodeValue *)barcodeMatrix[rowNumber][column] setValue:codeword.value];
+          }
+        }
       }
-      [(ZXPDF417BarcodeValue *)barcodeMatrix[codeword.rowNumber][column] setValue:codeword.value];
     }
+    column++;
   }
+
   return barcodeMatrix;
 }
 
@@ -404,7 +460,7 @@ static ZXPDF417ECErrorCorrection *errorCorrection;
   if (leftToRight) {
     endColumn = startColumn + codewordBitCount;
   } else {
-    for (int i = 0; i < [moduleBitCount count] >> 1; i++) {
+    for (int i = 0; i < [moduleBitCount count] / 2; i++) {
       int tmpCount = [moduleBitCount[i] intValue];
       moduleBitCount[i] = moduleBitCount[[moduleBitCount count] - 1 - i];
       moduleBitCount[[moduleBitCount count] - 1 - i] = @(tmpCount);
@@ -414,7 +470,7 @@ static ZXPDF417ECErrorCorrection *errorCorrection;
   }
   // TODO implement check for width and correction of black and white bars
   // use start (and maybe stop pattern) to determine if blackbars are wider than white bars. If so, adjust.
-  // should probably done only for codewords with a lot more than 17 bits. 
+  // should probably done only for codewords with a lot more than 17 bits.
   // The following fixes 10-1.png, which has wide black bars and small white bars
   //    for (int i = 0; i < moduleBitCount.length; i++) {
   //      if (i % 2 == 0) {
@@ -487,7 +543,7 @@ static ZXPDF417ECErrorCorrection *errorCorrection;
   for (int i = 0; i < 2; i++) {
     while (((leftToRight && correctedStartColumn >= minColumn) || (!leftToRight && correctedStartColumn < maxColumn)) &&
            leftToRight == [image getX:correctedStartColumn y:imageRow]) {
-      if (abs(codewordStartColumn - correctedStartColumn) > ZXPDF417_CODEWORD_SKEW_SIZE) {
+      if (abs(codewordStartColumn - correctedStartColumn) > ZX_PDF417_CODEWORD_SKEW_SIZE) {
         return codewordStartColumn;
       }
       correctedStartColumn += increment;
@@ -499,40 +555,51 @@ static ZXPDF417ECErrorCorrection *errorCorrection;
 }
 
 + (BOOL)checkCodewordSkew:(int)codewordSize minCodewordWidth:(int)minCodewordWidth maxCodewordWidth:(int)maxCodewordWidth {
-  return minCodewordWidth - ZXPDF417_CODEWORD_SKEW_SIZE <= codewordSize &&
-      codewordSize <= maxCodewordWidth + ZXPDF417_CODEWORD_SKEW_SIZE;
+  return minCodewordWidth - ZX_PDF417_CODEWORD_SKEW_SIZE <= codewordSize &&
+      codewordSize <= maxCodewordWidth + ZX_PDF417_CODEWORD_SKEW_SIZE;
 }
 
-+ (ZXDecoderResult *)decodeCodewords:(NSMutableArray *)codewords ecLevel:(int)ecLevel erasures:(NSArray *)erasures {
-  if ([codewords count] == 0) {
++ (ZXDecoderResult *)decodeCodewords:(ZXIntArray *)codewords ecLevel:(int)ecLevel erasures:(ZXIntArray *)erasures error:(NSError **)error {
+  if (codewords.length == 0) {
+    if (error) *error = ZXFormatErrorInstance();
     return nil;
   }
 
   int numECCodewords = 1 << (ecLevel + 1);
   int correctedErrorsCount = [self correctErrors:codewords erasures:erasures numECCodewords:numECCodewords];
   if (correctedErrorsCount == -1) {
+    if (error) *error = ZXChecksumErrorInstance();
     return nil;
   }
   if (![self verifyCodewordCount:codewords numECCodewords:numECCodewords]) {
+    if (error) *error = ZXFormatErrorInstance();
     return nil;
   }
 
   // Decode the codewords
-  ZXDecoderResult *decoderResult = [ZXPDF417DecodedBitStreamParser decode:codewords ecLevel:[@(ecLevel) stringValue] error:nil];
+  ZXDecoderResult *decoderResult = [ZXPDF417DecodedBitStreamParser decode:codewords ecLevel:[@(ecLevel) stringValue] error:error];
+  if (!decoderResult) {
+    return nil;
+  }
   decoderResult.errorsCorrected = @(correctedErrorsCount);
-  decoderResult.erasures = @([erasures count]);
+  decoderResult.erasures = @(erasures.length);
   return decoderResult;
 }
 
 /**
  * Given data and error-correction codewords received, possibly corrupted by errors, attempts to
  * correct the errors in-place.
+ *
+ * @param codewords   data and error correction codewords
+ * @param erasures positions of any known erasures
+ * @param numECCodewords number of error correction codewords that are available in codewords
+ * @throws ChecksumException if error correction fails
  */
-+ (int)correctErrors:(NSMutableArray *)codewords erasures:(NSArray *)erasures numECCodewords:(int)numECCodewords {
++ (int)correctErrors:(ZXIntArray *)codewords erasures:(ZXIntArray *)erasures numECCodewords:(int)numECCodewords {
   if (erasures &&
-      ([erasures count] > numECCodewords / 2 + ZXPDF417_MAX_ERRORS ||
+      (erasures.length > numECCodewords / 2 + ZX_PDF417_MAX_ERRORS ||
        numECCodewords < 0 ||
-       numECCodewords > ZXPDF417_MAX_EC_CODEWORDS)) {
+       numECCodewords > ZX_PDF417_MAX_EC_CODEWORDS)) {
     // Too many errors or EC Codewords is corrupted
     return -1;
   }
@@ -542,8 +609,8 @@ static ZXPDF417ECErrorCorrection *errorCorrection;
 /**
  * Verify that all is OK with the codeword array.
  */
-+ (BOOL)verifyCodewordCount:(NSMutableArray *)codewords numECCodewords:(int)numECCodewords {
-  if ([codewords count] < 4) {
++ (BOOL)verifyCodewordCount:(ZXIntArray *)codewords numECCodewords:(int)numECCodewords {
+  if (codewords.length < 4) {
     // Codeword array size should be at least 4 allowing for
     // Count CW, At least one Data CW, Error Correction CW, Error Correction CW
     return NO;
@@ -551,14 +618,14 @@ static ZXPDF417ECErrorCorrection *errorCorrection;
   // The first codeword, the Symbol Length Descriptor, shall always encode the total number of data
   // codewords in the symbol, including the Symbol Length Descriptor itself, data codewords and pad
   // codewords, but excluding the number of error correction codewords.
-  int numberOfCodewords = [codewords[0] intValue];
-  if (numberOfCodewords > [codewords count]) {
+  int numberOfCodewords = codewords.array[0];
+  if (numberOfCodewords > codewords.length) {
     return NO;
   }
   if (numberOfCodewords == 0) {
     // Reset to the length of the array - 8 (Allow for at least level 3 Error Correction (8 Error Codewords)
-    if (numECCodewords < [codewords count]) {
-      codewords[0] = @([codewords count] - numECCodewords);
+    if (numECCodewords < codewords.length) {
+      codewords.array[0] = codewords.length - numECCodewords;
     } else {
       return NO;
     }
@@ -603,11 +670,11 @@ static ZXPDF417ECErrorCorrection *errorCorrection;
     [result appendFormat:@"Row %2d: ", row];
     for (int column = 0; column < [(NSArray *)barcodeMatrix[row] count]; column++) {
       ZXPDF417BarcodeValue *barcodeValue = barcodeMatrix[row][column];
-      if ([[barcodeValue value] count] == 0) {
+      if ([barcodeValue value].length == 0) {
         [result appendString:@"        "];
       } else {
-        [result appendFormat:@"%4d(%2d)", [[barcodeValue value][0] intValue],
-         [[barcodeValue confidence:[[barcodeValue value][0] intValue]] intValue]];
+        [result appendFormat:@"%4d(%2d)", [barcodeValue value].array[0],
+         [[barcodeValue confidence:[barcodeValue value].array[0]] intValue]];
       }
     }
     [result appendString:@"\n"];

@@ -20,37 +20,23 @@
 
 @interface ZXWhiteRectangleDetector ()
 
-@property (nonatomic, strong) ZXBitMatrix *image;
-@property (nonatomic, assign) int height;
-@property (nonatomic, assign) int width;
-@property (nonatomic, assign) int leftInit;
-@property (nonatomic, assign) int rightInit;
-@property (nonatomic, assign) int downInit;
-@property (nonatomic, assign) int upInit;
+@property (nonatomic, strong, readonly) ZXBitMatrix *image;
+@property (nonatomic, assign, readonly) int height;
+@property (nonatomic, assign, readonly) int width;
+@property (nonatomic, assign, readonly) int leftInit;
+@property (nonatomic, assign, readonly) int rightInit;
+@property (nonatomic, assign, readonly) int downInit;
+@property (nonatomic, assign, readonly) int upInit;
 
 @end
 
-int const INIT_SIZE = 30;
-int const CORR = 1;
+const int ZX_INIT_SIZE = 10;
+const int ZX_CORR = 1;
 
 @implementation ZXWhiteRectangleDetector
 
 - (id)initWithImage:(ZXBitMatrix *)image error:(NSError **)error {
-  if (self = [super init]) {
-    _image = image;
-    _height = image.height;
-    _width = image.width;
-    _leftInit = (_width - INIT_SIZE) >> 1;
-    _rightInit = (_width + INIT_SIZE) >> 1;
-    _upInit = (_height - INIT_SIZE) >> 1;
-    _downInit = (_height + INIT_SIZE) >> 1;
-    if (_upInit < 0 || _leftInit < 0 || _downInit >= _height || _rightInit >= _width) {
-      if (error) *error = NotFoundErrorInstance();
-      return nil;
-    }
-  }
-
-  return self;
+  return [self initWithImage:image initSize:ZX_INIT_SIZE x:image.width / 2 y:image.height / 2 error:error];
 }
 
 - (id)initWithImage:(ZXBitMatrix *)image initSize:(int)initSize x:(int)x y:(int)y error:(NSError **)error {
@@ -58,13 +44,13 @@ int const CORR = 1;
     _image = image;
     _height = image.height;
     _width = image.width;
-    int halfsize = initSize >> 1;
+    int halfsize = initSize / 2;
     _leftInit = x - halfsize;
     _rightInit = x + halfsize;
     _upInit = y - halfsize;
     _downInit = y + halfsize;
     if (_upInit < 0 || _leftInit < 0 || _downInit >= _height || _rightInit >= _width) {
-      if (error) *error = NotFoundErrorInstance();
+      if (error) *error = ZXNotFoundErrorInstance();
       return nil;
     }
   }
@@ -72,17 +58,6 @@ int const CORR = 1;
   return self;
 }
 
-/**
- * Detects a candidate barcode-like rectangular region within an image. It
- * starts around the center of the image, increases the size of the candidate
- * region until it finds a white rectangular region.
- * 
- * Returns a ResultPoint NSArray describing the corners of the rectangular
- * region. The first and last points are opposed on the diagonal, as
- * are the second and third. The first point will be the topmost
- * point and the last, the bottommost. The second point will be
- * leftmost and the third, the rightmost
- */
 - (NSArray *)detectWithError:(NSError **)error {
   int left = self.leftInit;
   int right = self.rightInit;
@@ -92,6 +67,11 @@ int const CORR = 1;
   BOOL aBlackPointFoundOnBorder = YES;
   BOOL atLeastOneBlackPointFoundOnBorder = NO;
 
+  BOOL atLeastOneBlackPointFoundOnRight = NO;
+  BOOL atLeastOneBlackPointFoundOnBottom = NO;
+  BOOL atLeastOneBlackPointFoundOnLeft = NO;
+  BOOL atLeastOneBlackPointFoundOnTop = NO;
+
   while (aBlackPointFoundOnBorder) {
     aBlackPointFoundOnBorder = NO;
 
@@ -99,11 +79,14 @@ int const CORR = 1;
     // .   |
     // .....
     BOOL rightBorderNotWhite = YES;
-    while (rightBorderNotWhite && right < self.width) {
+    while ((rightBorderNotWhite || !atLeastOneBlackPointFoundOnRight) && right < self.width) {
       rightBorderNotWhite = [self containsBlackPoint:up b:down fixed:right horizontal:NO];
       if (rightBorderNotWhite) {
         right++;
         aBlackPointFoundOnBorder = YES;
+        atLeastOneBlackPointFoundOnRight = YES;
+      } else if (!atLeastOneBlackPointFoundOnRight) {
+        right++;
       }
     }
 
@@ -116,11 +99,14 @@ int const CORR = 1;
     // .   .
     // .___.
     BOOL bottomBorderNotWhite = YES;
-    while (bottomBorderNotWhite && down < self.height) {
+    while ((bottomBorderNotWhite || !atLeastOneBlackPointFoundOnBottom) && down < self.height) {
       bottomBorderNotWhite = [self containsBlackPoint:left b:right fixed:down horizontal:YES];
       if (bottomBorderNotWhite) {
         down++;
         aBlackPointFoundOnBorder = YES;
+        atLeastOneBlackPointFoundOnBottom = YES;
+      } else if (!atLeastOneBlackPointFoundOnBottom) {
+        down++;
       }
     }
 
@@ -133,11 +119,14 @@ int const CORR = 1;
     // |   .
     // .....
     BOOL leftBorderNotWhite = YES;
-    while (leftBorderNotWhite && left >= 0) {
+    while ((leftBorderNotWhite || !atLeastOneBlackPointFoundOnLeft) && left >= 0) {
       leftBorderNotWhite = [self containsBlackPoint:up b:down fixed:left horizontal:NO];
       if (leftBorderNotWhite) {
         left--;
         aBlackPointFoundOnBorder = YES;
+        atLeastOneBlackPointFoundOnLeft = YES;
+      } else if (!atLeastOneBlackPointFoundOnLeft) {
+        left--;
       }
     }
 
@@ -150,11 +139,14 @@ int const CORR = 1;
     // .   .
     // .....
     BOOL topBorderNotWhite = YES;
-    while (topBorderNotWhite && up >= 0) {
+    while ((topBorderNotWhite  || !atLeastOneBlackPointFoundOnTop) && up >= 0) {
       topBorderNotWhite = [self containsBlackPoint:left b:right fixed:up horizontal:YES];
       if (topBorderNotWhite) {
         up--;
         aBlackPointFoundOnBorder = YES;
+        atLeastOneBlackPointFoundOnTop = YES;
+      } else if (!atLeastOneBlackPointFoundOnTop) {
+        up--;
       }
     }
 
@@ -180,7 +172,7 @@ int const CORR = 1;
     }
 
     if (z == nil) {
-      if (error) *error = NotFoundErrorInstance();
+      if (error) *error = ZXNotFoundErrorInstance();
       return nil;
     }
 
@@ -193,7 +185,7 @@ int const CORR = 1;
     }
 
     if (t == nil) {
-      if (error) *error = NotFoundErrorInstance();
+      if (error) *error = ZXNotFoundErrorInstance();
       return nil;
     }
 
@@ -206,7 +198,7 @@ int const CORR = 1;
     }
 
     if (x == nil) {
-      if (error) *error = NotFoundErrorInstance();
+      if (error) *error = ZXNotFoundErrorInstance();
       return nil;
     }
 
@@ -219,12 +211,12 @@ int const CORR = 1;
     }
 
     if (y == nil) {
-      if (error) *error = NotFoundErrorInstance();
+      if (error) *error = ZXNotFoundErrorInstance();
       return nil;
     }
     return [self centerEdges:y z:z x:x t:t];
   } else {
-    if (error) *error = NotFoundErrorInstance();
+    if (error) *error = ZXNotFoundErrorInstance();
     return nil;
   }
 }
@@ -249,11 +241,15 @@ int const CORR = 1;
 /**
  * recenters the points of a constant distance towards the center
  *
- * returns a ResultPoint NSArray describing the corners of the rectangular
- * region. The first and last points are opposed on the diagonal, as
- * are the second and third. The first point will be the topmost
- * point and the last, the bottommost. The second point will be
- * leftmost and the third, the rightmost
+ * @param y bottom most point
+ * @param z left most point
+ * @param x right most point
+ * @param t top most point
+ * @return ZXResultPoint array describing the corners of the rectangular
+ *         region. The first and last points are opposed on the diagonal, as
+ *         are the second and third. The first point will be the topmost
+ *         point and the last, the bottommost. The second point will be
+ *         leftmost and the third, the rightmost
  */
 - (NSArray *)centerEdges:(ZXResultPoint *)y z:(ZXResultPoint *)z x:(ZXResultPoint *)x t:(ZXResultPoint *)t {
   //
@@ -273,21 +269,26 @@ int const CORR = 1;
   float tj = t.y;
 
   if (yi < self.width / 2.0f) {
-    return @[[[ZXResultPoint alloc] initWithX:ti - CORR y:tj + CORR],
-             [[ZXResultPoint alloc] initWithX:zi + CORR y:zj + CORR],
-             [[ZXResultPoint alloc] initWithX:xi - CORR y:xj - CORR],
-             [[ZXResultPoint alloc] initWithX:yi + CORR y:yj - CORR]];
+    return @[[[ZXResultPoint alloc] initWithX:ti - ZX_CORR y:tj + ZX_CORR],
+             [[ZXResultPoint alloc] initWithX:zi + ZX_CORR y:zj + ZX_CORR],
+             [[ZXResultPoint alloc] initWithX:xi - ZX_CORR y:xj - ZX_CORR],
+             [[ZXResultPoint alloc] initWithX:yi + ZX_CORR y:yj - ZX_CORR]];
   } else {
-    return @[[[ZXResultPoint alloc] initWithX:ti + CORR y:tj + CORR],
-             [[ZXResultPoint alloc] initWithX:zi + CORR y:zj - CORR],
-             [[ZXResultPoint alloc] initWithX:xi - CORR y:xj + CORR],
-             [[ZXResultPoint alloc] initWithX:yi - CORR y:yj - CORR]];
+    return @[[[ZXResultPoint alloc] initWithX:ti + ZX_CORR y:tj + ZX_CORR],
+             [[ZXResultPoint alloc] initWithX:zi + ZX_CORR y:zj - ZX_CORR],
+             [[ZXResultPoint alloc] initWithX:xi - ZX_CORR y:xj + ZX_CORR],
+             [[ZXResultPoint alloc] initWithX:yi - ZX_CORR y:yj - ZX_CORR]];
   }
 }
 
-
 /**
  * Determines whether a segment contains a black point
+ *
+ * @param a          min value of the scanned coordinate
+ * @param b          max value of the scanned coordinate
+ * @param fixed      value of fixed coordinate
+ * @param horizontal set to true if scan must be horizontal, false if vertical
+ * @return true if a black point has been found, else false.
  */
 - (BOOL)containsBlackPoint:(int)a b:(int)b fixed:(int)fixed horizontal:(BOOL)horizontal {
   if (horizontal) {

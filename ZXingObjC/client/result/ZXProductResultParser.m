@@ -21,22 +21,20 @@
 
 @implementation ZXProductResultParser
 
+// Treat all UPC and EAN variants as UPCs, in the sense that they are all product barcodes.
 - (ZXParsedResult *)parse:(ZXResult *)result {
   ZXBarcodeFormat format = [result barcodeFormat];
   if (!(format == kBarcodeFormatUPCA || format == kBarcodeFormatUPCE || format == kBarcodeFormatEan8 || format == kBarcodeFormatEan13)) {
     return nil;
   }
   NSString *rawText = [ZXResultParser massagedText:result];
-  NSUInteger length = [rawText length];
-  for (int x = 0; x < length; x++) {
-    unichar c = [rawText characterAtIndex:x];
-    if (c < '0' || c > '9') {
-      return nil;
-    }
+  if (![[self class] isStringOfDigits:rawText length:(unsigned int)[rawText length]]) {
+    return nil;
   }
+  // Not actually checking the checksum again here
 
   NSString *normalizedProductID;
-  if (format == kBarcodeFormatUPCE) {
+  if (format == kBarcodeFormatUPCE && [rawText length] == 8) {
     normalizedProductID = [ZXUPCEReader convertUPCEtoUPCA:rawText];
   } else {
     normalizedProductID = rawText;

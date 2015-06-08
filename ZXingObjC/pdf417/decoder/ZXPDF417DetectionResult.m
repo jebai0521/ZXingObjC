@@ -22,13 +22,13 @@
 #import "ZXPDF417DetectionResultColumn.h"
 #import "ZXPDF417DetectionResultRowIndicatorColumn.h"
 
-int const ADJUST_ROW_NUMBER_SKIP = 2;
+const int ZX_PDF417_ADJUST_ROW_NUMBER_SKIP = 2;
 
 @interface ZXPDF417DetectionResult ()
 
-@property (nonatomic, strong) ZXPDF417BarcodeMetadata *barcodeMetadata;
-@property (nonatomic, strong) NSMutableArray *detectionResultColumnsInternal;
-@property (nonatomic, assign) int barcodeColumnCount;
+@property (nonatomic, strong, readonly) ZXPDF417BarcodeMetadata *barcodeMetadata;
+@property (nonatomic, strong, readonly) NSMutableArray *detectionResultColumnsInternal;
+@property (nonatomic, assign, readonly) int barcodeColumnCount;
 
 @end
 
@@ -52,7 +52,7 @@ int const ADJUST_ROW_NUMBER_SKIP = 2;
 - (NSArray *)detectionResultColumns {
   [self adjustIndicatorColumnRowNumbers:self.detectionResultColumnsInternal[0]];
   [self adjustIndicatorColumnRowNumbers:self.detectionResultColumnsInternal[self.barcodeColumnCount + 1]];
-  int unadjustedCodewordCount = ZXPDF417_MAX_CODEWORDS_IN_BARCODE;
+  int unadjustedCodewordCount = ZX_PDF417_MAX_CODEWORDS_IN_BARCODE;
   int previousUnadjustedCount;
   do {
     previousUnadjustedCount = unadjustedCodewordCount;
@@ -71,7 +71,7 @@ int const ADJUST_ROW_NUMBER_SKIP = 2;
 // we should be able to estimate the row height and use it as a hint for the row number
 // we should also fill the rows top to bottom and bottom to top
 /**
- * Returns the number of codewords which don't have a valid row number. Note that the count is not accurate as codewords
+ * @return number of codewords which don't have a valid row number. Note that the count is not accurate as codewords
  * will be counted several times. It just serves as an indicator to see when we can stop adjusting row numbers
  */
 - (int)adjustRowNumbers {
@@ -103,9 +103,9 @@ int const ADJUST_ROW_NUMBER_SKIP = 2;
   return unadjustedCount + [self adjustRowNumbersFromRRI];
 }
 
-- (int)adjustRowNumbersFromBothRI {
+- (void)adjustRowNumbersFromBothRI {
   if (self.detectionResultColumnsInternal[0] == [NSNull null] || self.detectionResultColumnsInternal[self.barcodeColumnCount + 1] == [NSNull null]) {
-    return 0;
+    return;
   }
   NSArray *LRIcodewords = [(ZXPDF417DetectionResultColumn *)self.detectionResultColumnsInternal[0] codewords];
   NSArray *RRIcodewords = [(ZXPDF417DetectionResultColumn *)self.detectionResultColumnsInternal[self.barcodeColumnCount + 1] codewords];
@@ -125,7 +125,6 @@ int const ADJUST_ROW_NUMBER_SKIP = 2;
       }
     }
   }
-  return 0;
 }
 
 - (int)adjustRowNumbersFromRRI {
@@ -140,7 +139,7 @@ int const ADJUST_ROW_NUMBER_SKIP = 2;
     }
     int rowIndicatorRowNumber = [codewords[codewordsRow] rowNumber];
     int invalidRowCounts = 0;
-    for (int barcodeColumn = self.barcodeColumnCount + 1; barcodeColumn > 0 && invalidRowCounts < ADJUST_ROW_NUMBER_SKIP; barcodeColumn--) {
+    for (int barcodeColumn = self.barcodeColumnCount + 1; barcodeColumn > 0 && invalidRowCounts < ZX_PDF417_ADJUST_ROW_NUMBER_SKIP; barcodeColumn--) {
       if (self.detectionResultColumnsInternal[barcodeColumn] != [NSNull null]) {
         ZXPDF417Codeword *codeword = [self.detectionResultColumnsInternal[barcodeColumn] codewords][codewordsRow];
         if ((id)codeword != [NSNull null]) {
@@ -167,7 +166,7 @@ int const ADJUST_ROW_NUMBER_SKIP = 2;
     }
     int rowIndicatorRowNumber = [codewords[codewordsRow] rowNumber];
     int invalidRowCounts = 0;
-    for (int barcodeColumn = 1; barcodeColumn < self.barcodeColumnCount + 1 && invalidRowCounts < ADJUST_ROW_NUMBER_SKIP; barcodeColumn++) {
+    for (int barcodeColumn = 1; barcodeColumn < self.barcodeColumnCount + 1 && invalidRowCounts < ZX_PDF417_ADJUST_ROW_NUMBER_SKIP; barcodeColumn++) {
       if (self.detectionResultColumnsInternal[barcodeColumn] != [NSNull null]) {
         ZXPDF417Codeword *codeword = [self.detectionResultColumnsInternal[barcodeColumn] codewords][codewordsRow];
         if ((id)codeword != [NSNull null]) {
@@ -241,7 +240,7 @@ int const ADJUST_ROW_NUMBER_SKIP = 2;
 }
 
 /**
- * Return true if row number was adjusted, false otherwise
+ * @return true, if row number was adjusted, false otherwise
  */
 - (BOOL)adjustRowNumber:(ZXPDF417Codeword *)codeword otherCodeword:(ZXPDF417Codeword *)otherCodeword {
   if ((id)otherCodeword == [NSNull null]) {
@@ -252,10 +251,6 @@ int const ADJUST_ROW_NUMBER_SKIP = 2;
     return YES;
   }
   return NO;
-}
-
-- (int)barcodeColumnCount {
-  return _barcodeColumnCount;
 }
 
 - (int)barcodeRowCount {

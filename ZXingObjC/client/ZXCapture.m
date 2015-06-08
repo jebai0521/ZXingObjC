@@ -14,13 +14,13 @@
  * limitations under the License.
  */
 
+#import <ImageIO/ImageIO.h>
 #import "ZXBinaryBitmap.h"
 #import "ZXCapture.h"
 #import "ZXCaptureDelegate.h"
 #import "ZXCGImageLuminanceSource.h"
 #import "ZXDecodeHints.h"
 #import "ZXHybridBinarizer.h"
-#import "ZXMultiFormatReader.h"
 #import "ZXReader.h"
 #import "ZXResult.h"
 
@@ -29,13 +29,7 @@
 @property (nonatomic, strong) CALayer *binaryLayer;
 @property (nonatomic, assign) BOOL cameraIsReady;
 @property (nonatomic, assign) int captureDeviceIndex;
-
-#if __IPHONE_OS_VERSION_MIN_REQUIRED < 60000
-@property (nonatomic, strong) __attribute__((NSObject)) dispatch_queue_t captureQueue;
-#else
 @property (nonatomic, strong) dispatch_queue_t captureQueue;
-#endif
-
 @property (nonatomic, assign) BOOL hardStop;
 @property (nonatomic, strong) AVCaptureDeviceInput *input;
 @property (nonatomic, strong) AVCaptureVideoPreviewLayer *layer;
@@ -62,7 +56,11 @@
     _onScreen = NO;
     _orderInSkip = 0;
     _orderOutSkip = 0;
-    _reader = [ZXMultiFormatReader reader];
+
+    if (NSClassFromString(@"ZXMultiFormatReader")) {
+      _reader = [NSClassFromString(@"ZXMultiFormatReader") performSelector:@selector(reader)];
+    }
+
     _rotation = 0.0f;
     _running = NO;
     _sessionPreset = AVCaptureSessionPresetMedium;
@@ -76,6 +74,18 @@
 - (void)dealloc {
   if (_lastScannedImage) {
     CGImageRelease(_lastScannedImage);
+  }
+
+  if (_session && _session.inputs) {
+    for (AVCaptureInput *input in _session.inputs) {
+      [_session removeInput:input];
+    }
+  }
+
+  if (_session && _session.outputs) {
+    for (AVCaptureOutput *output in _session.outputs) {
+      [_session removeOutput:output];
+    }
   }
 }
 
@@ -254,7 +264,7 @@
   }
 
   if (self.delegate || self.luminanceLayer || self.binaryLayer) {
-    [self output];
+    (void)[self output];
   }
 
   if (!self.session.running) {
@@ -263,9 +273,7 @@
       abort();
     }
 
-    dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0), ^{
-      [self.session startRunning];
-    });
+    [self.session startRunning];
   }
   self.running = YES;
 }
@@ -276,11 +284,7 @@
   }
 
   if (self.session.running) {
-    [self.layer removeFromSuperlayer];
-
-    dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0), ^{
-      [self.session stopRunning];
-    });
+    [self.session stopRunning];
   }
 
   self.running = NO;
@@ -323,6 +327,8 @@
 - (void)captureOutput:(AVCaptureOutput *)captureOutput
 didOutputSampleBuffer:(CMSampleBufferRef)sampleBuffer
        fromConnection:(AVCaptureConnection *)connection {
+  if (!self.running) return;
+
   @autoreleasepool {
     if (!self.cameraIsReady) {
       self.cameraIsReady = YES;
