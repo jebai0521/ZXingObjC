@@ -222,15 +222,10 @@
 		0217452218E358F600864750 /* CoreMedia.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 0217451F18E358EE00864750 /* CoreMedia.framework */; };
 		0217452318E358F600864750 /* CoreMedia.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 0217451F18E358EE00864750 /* CoreMedia.framework */; };
 		0217453518E35AEA00864750 /* ImageIO.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 0217453418E35AEA00864750 /* ImageIO.framework */; };
-		0217453618E35AEE00864750 /* ImageIO.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 0217453418E35AEA00864750 /* ImageIO.framework */; };
 		0217453818E35AF800864750 /* CoreVideo.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 0217453718E35AF800864750 /* CoreVideo.framework */; };
-		0217453918E35AFF00864750 /* CoreVideo.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 0217453718E35AF800864750 /* CoreVideo.framework */; };
 		0217453B18E35B2B00864750 /* CoreGraphics.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 0217453A18E35B2B00864750 /* CoreGraphics.framework */; };
-		0217453C18E35B2F00864750 /* CoreGraphics.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 0217453A18E35B2B00864750 /* CoreGraphics.framework */; };
 		0217454618E35C1000864750 /* QuartzCore.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 0217454518E35C1000864750 /* QuartzCore.framework */; };
 		0217454818E35C2700864750 /* CoreMedia.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 0217454718E35C2700864750 /* CoreMedia.framework */; };
-		0217454918E35C3700864750 /* CoreMedia.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 0217454718E35C2700864750 /* CoreMedia.framework */; };
-		0217454A18E35C3E00864750 /* QuartzCore.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 0217454518E35C1000864750 /* QuartzCore.framework */; };
 		0218B84E18D230B70005E7EC /* ZXAztecToken.h in Headers */ = {isa = PBXBuildFile; fileRef = 0218B84B18D230B70005E7EC /* ZXAztecToken.h */; };
 		0218B84F18D230B70005E7EC /* ZXAztecToken.h in Headers */ = {isa = PBXBuildFile; fileRef = 0218B84B18D230B70005E7EC /* ZXAztecToken.h */; };
 		0218B85018D230B70005E7EC /* ZXAztecToken.m in Sources */ = {isa = PBXBuildFile; fileRef = 0218B84C18D230B70005E7EC /* ZXAztecToken.m */; };
@@ -257,60 +252,6 @@
 		0218B87918D23A170005E7EC /* ZXAztecHighLevelEncoder.m in Sources */ = {isa = PBXBuildFile; fileRef = 0218B87418D23A170005E7EC /* ZXAztecHighLevelEncoder.m */; };
 		0218B87A18D23A170005E7EC /* ZXAztecHighLevelEncoder.m in Sources */ = {isa = PBXBuildFile; fileRef = 0218B87418D23A170005E7EC /* ZXAztecHighLevelEncoder.m */; };
 		0228E71418E3562F004EF5D6 /* Cocoa.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 2540438F166AB91700E13304 /* Cocoa.framework */; };
-		023E696B18C0EF26001FF123 /* ZXAztecBlackBox1TestCase.m in Sources */ = {isa = PBXBuildFile; fileRef = 25403FEF166AA0F100E13304 /* ZXAztecBlackBox1TestCase.m */; };
-		023E696C18C0EF26001FF123 /* ZXAztecBlackBox2TestCase.m in Sources */ = {isa = PBXBuildFile; fileRef = 25403FF1166AA0F100E13304 /* ZXAztecBlackBox2TestCase.m */; };
-		023E696D18C0EF26001FF123 /* ZXAbstractBlackBoxTestCase.m in Sources */ = {isa = PBXBuildFile; fileRef = 2540400E166AA0F100E13304 /* ZXAbstractBlackBoxTestCase.m */; };
-		023E696E18C0EF26001FF123 /* ZXAbstractNegativeBlackBoxTestCase.m in Sources */ = {isa = PBXBuildFile; fileRef = 25404010166AA0F100E13304 /* ZXAbstractNegativeBlackBoxTestCase.m */; };
-		023E696F18C0EF26001FF123 /* ZXTestResult.m in Sources */ = {isa = PBXBuildFile; fileRef = 2540401B166AA0F100E13304 /* ZXTestResult.m */; };
-		023E697018C0EF26001FF123 /* ZXDataMatrixBlackBox1TestCase.m in Sources */ = {isa = PBXBuildFile; fileRef = 2540402A166AA0F100E13304 /* ZXDataMatrixBlackBox1TestCase.m */; };
-		023E697118C0EF26001FF123 /* ZXDataMatrixBlackBox2TestCase.m in Sources */ = {isa = PBXBuildFile; fileRef = 2540402C166AA0F100E13304 /* ZXDataMatrixBlackBox2TestCase.m */; };
-		023E697218C0EF26001FF123 /* ZXFalsePositives2BlackBoxTestCase.m in Sources */ = {isa = PBXBuildFile; fileRef = 25404032166AA0F100E13304 /* ZXFalsePositives2BlackBoxTestCase.m */; };
-		023E697318C0EF26001FF123 /* ZXFalsePositivesBlackBoxTestCase.m in Sources */ = {isa = PBXBuildFile; fileRef = 25404034166AA0F100E13304 /* ZXFalsePositivesBlackBoxTestCase.m */; };
-		023E697418C0EF26001FF123 /* ZXPartialBlackBoxTestCase.m in Sources */ = {isa = PBXBuildFile; fileRef = 25404036166AA0F100E13304 /* ZXPartialBlackBoxTestCase.m */; };
-		023E697518C0EF26001FF123 /* ZXUnsupportedBlackBoxTestCase.m in Sources */ = {isa = PBXBuildFile; fileRef = 25404038166AA0F100E13304 /* ZXUnsupportedBlackBoxTestCase.m */; };
-		023E697618C0EF26001FF123 /* ZXCodabarBlackbox1TestCase.m in Sources */ = {isa = PBXBuildFile; fileRef = 2540403B166AA0F100E13304 /* ZXCodabarBlackbox1TestCase.m */; };
-		023E697718C0EF26001FF123 /* ZXCode128BlackBox1TestCase.m in Sources */ = {isa = PBXBuildFile; fileRef = 2540403D166AA0F100E13304 /* ZXCode128BlackBox1TestCase.m */; };
-		023E697818C0EF26001FF123 /* ZXCode128BlackBox2TestCase.m in Sources */ = {isa = PBXBuildFile; fileRef = 2540403F166AA0F100E13304 /* ZXCode128BlackBox2TestCase.m */; };
-		023E697918C0EF26001FF123 /* ZXCode128BlackBox3TestCase.m in Sources */ = {isa = PBXBuildFile; fileRef = 25404041166AA0F100E13304 /* ZXCode128BlackBox3TestCase.m */; };
-		023E697A18C0EF26001FF123 /* ZXCode39BlackBox1TestCase.m in Sources */ = {isa = PBXBuildFile; fileRef = 25404043166AA0F100E13304 /* ZXCode39BlackBox1TestCase.m */; };
-		023E697B18C0EF26001FF123 /* ZXCode39BlackBox3TestCase.m in Sources */ = {isa = PBXBuildFile; fileRef = 25404045166AA0F100E13304 /* ZXCode39BlackBox3TestCase.m */; };
-		023E697C18C0EF26001FF123 /* ZXCode39ExtendedBlackBox2TestCase.m in Sources */ = {isa = PBXBuildFile; fileRef = 25404047166AA0F100E13304 /* ZXCode39ExtendedBlackBox2TestCase.m */; };
-		023E697D18C0EF26001FF123 /* ZXCode93BlackBox1TestCase.m in Sources */ = {isa = PBXBuildFile; fileRef = 25404049166AA0F100E13304 /* ZXCode93BlackBox1TestCase.m */; };
-		023E697E18C0EF26001FF123 /* ZXEAN13BlackBox1TestCase.m in Sources */ = {isa = PBXBuildFile; fileRef = 2540404B166AA0F100E13304 /* ZXEAN13BlackBox1TestCase.m */; };
-		023E697F18C0EF26001FF123 /* ZXEAN13BlackBox2TestCase.m in Sources */ = {isa = PBXBuildFile; fileRef = 2540404D166AA0F100E13304 /* ZXEAN13BlackBox2TestCase.m */; };
-		023E698018C0EF26001FF123 /* ZXEAN13BlackBox3TestCase.m in Sources */ = {isa = PBXBuildFile; fileRef = 2540404F166AA0F100E13304 /* ZXEAN13BlackBox3TestCase.m */; };
-		023E698118C0EF26001FF123 /* ZXEAN13BlackBox4TestCase.m in Sources */ = {isa = PBXBuildFile; fileRef = 25404051166AA0F100E13304 /* ZXEAN13BlackBox4TestCase.m */; };
-		023E698218C0EF26001FF123 /* ZXEAN13BlackBox5BlurryTestCase.m in Sources */ = {isa = PBXBuildFile; fileRef = 25404053166AA0F100E13304 /* ZXEAN13BlackBox5BlurryTestCase.m */; };
-		023E698318C0EF26001FF123 /* ZXEAN8BlackBox1TestCase.m in Sources */ = {isa = PBXBuildFile; fileRef = 25404055166AA0F100E13304 /* ZXEAN8BlackBox1TestCase.m */; };
-		023E698418C0EF26001FF123 /* ZXITFBlackBox1TestCase.m in Sources */ = {isa = PBXBuildFile; fileRef = 25404057166AA0F100E13304 /* ZXITFBlackBox1TestCase.m */; };
-		023E698518C0EF26001FF123 /* ZXITFBlackBox2TestCase.m in Sources */ = {isa = PBXBuildFile; fileRef = 25404059166AA0F100E13304 /* ZXITFBlackBox2TestCase.m */; };
-		023E698618C0EF26001FF123 /* ZXRSSExpandedBlackBox1TestCase.m in Sources */ = {isa = PBXBuildFile; fileRef = 2540406A166AA0F100E13304 /* ZXRSSExpandedBlackBox1TestCase.m */; };
-		023E698718C0EF26001FF123 /* ZXRSSExpandedBlackBox2TestCase.m in Sources */ = {isa = PBXBuildFile; fileRef = 2540406C166AA0F100E13304 /* ZXRSSExpandedBlackBox2TestCase.m */; };
-		023E698818C0EF26001FF123 /* ZXRSSExpandedBlackBox3TestCase.m in Sources */ = {isa = PBXBuildFile; fileRef = 2540406E166AA0F100E13304 /* ZXRSSExpandedBlackBox3TestCase.m */; };
-		023E698918C0EF26001FF123 /* ZXRSSExpandedStackedBlackBox1TestCase.m in Sources */ = {isa = PBXBuildFile; fileRef = 25FE5D3916D0B82F00826CDB /* ZXRSSExpandedStackedBlackBox1TestCase.m */; };
-		023E698A18C0EF26001FF123 /* ZXRSSExpandedStackedBlackBox2TestCase.m in Sources */ = {isa = PBXBuildFile; fileRef = 25FE5D3B16D0B83000826CDB /* ZXRSSExpandedStackedBlackBox2TestCase.m */; };
-		023E698B18C0EF26001FF123 /* ZXRSS14BlackBox1TestCase.m in Sources */ = {isa = PBXBuildFile; fileRef = 25404080166AA0F100E13304 /* ZXRSS14BlackBox1TestCase.m */; };
-		023E698C18C0EF26001FF123 /* ZXRSS14BlackBox2TestCase.m in Sources */ = {isa = PBXBuildFile; fileRef = 25404082166AA0F100E13304 /* ZXRSS14BlackBox2TestCase.m */; };
-		023E698D18C0EF26001FF123 /* ZXUPCABlackBox1TestCase.m in Sources */ = {isa = PBXBuildFile; fileRef = 25404084166AA0F100E13304 /* ZXUPCABlackBox1TestCase.m */; };
-		023E698E18C0EF26001FF123 /* ZXUPCABlackBox2TestCase.m in Sources */ = {isa = PBXBuildFile; fileRef = 25404086166AA0F100E13304 /* ZXUPCABlackBox2TestCase.m */; };
-		023E698F18C0EF26001FF123 /* ZXUPCABlackBox3ReflectiveTestCase.m in Sources */ = {isa = PBXBuildFile; fileRef = 25404088166AA0F100E13304 /* ZXUPCABlackBox3ReflectiveTestCase.m */; };
-		023E699018C0EF26001FF123 /* ZXUPCABlackBox4TestCase.m in Sources */ = {isa = PBXBuildFile; fileRef = 2540408A166AA0F100E13304 /* ZXUPCABlackBox4TestCase.m */; };
-		023E699118C0EF26001FF123 /* ZXUPCABlackBox5TestCase.m in Sources */ = {isa = PBXBuildFile; fileRef = 2540408C166AA0F100E13304 /* ZXUPCABlackBox5TestCase.m */; };
-		023E699218C0EF26001FF123 /* ZXUPCABlackBox6BlurryTestCase.m in Sources */ = {isa = PBXBuildFile; fileRef = 2540408E166AA0F100E13304 /* ZXUPCABlackBox6BlurryTestCase.m */; };
-		023E699318C0EF26001FF123 /* ZXUPCEANExtensionBlackBox1TestCase.m in Sources */ = {isa = PBXBuildFile; fileRef = 25404090166AA0F100E13304 /* ZXUPCEANExtensionBlackBox1TestCase.m */; };
-		023E699418C0EF26001FF123 /* ZXUPCEBlackBox1TestCase.m in Sources */ = {isa = PBXBuildFile; fileRef = 25404092166AA0F100E13304 /* ZXUPCEBlackBox1TestCase.m */; };
-		023E699518C0EF26001FF123 /* ZXUPCEBlackBox2TestCase.m in Sources */ = {isa = PBXBuildFile; fileRef = 25404094166AA0F100E13304 /* ZXUPCEBlackBox2TestCase.m */; };
-		023E699618C0EF26001FF123 /* ZXUPCEBlackBox3ReflectiveTestCase.m in Sources */ = {isa = PBXBuildFile; fileRef = 25404096166AA0F100E13304 /* ZXUPCEBlackBox3ReflectiveTestCase.m */; };
-		023E699718C0EF26001FF123 /* ZXPDF417BlackBox1TestCase.m in Sources */ = {isa = PBXBuildFile; fileRef = 254040AD166AA0F100E13304 /* ZXPDF417BlackBox1TestCase.m */; };
-		023E699818C0EF26001FF123 /* ZXPDF417BlackBox2TestCase.m in Sources */ = {isa = PBXBuildFile; fileRef = 254040AF166AA0F100E13304 /* ZXPDF417BlackBox2TestCase.m */; };
-		023E699918C0EF26001FF123 /* ZXPDF417BlackBox3TestCase.m in Sources */ = {isa = PBXBuildFile; fileRef = 25E9E91817FA555400364861 /* ZXPDF417BlackBox3TestCase.m */; };
-		023E699A18C0EF26001FF123 /* ZXPDF417BlackBox4TestCase.m in Sources */ = {isa = PBXBuildFile; fileRef = 25B582981816F7B00013634A /* ZXPDF417BlackBox4TestCase.m */; };
-		023E699B18C0EF26001FF123 /* ZXQRCodeBlackBox1TestCase.m in Sources */ = {isa = PBXBuildFile; fileRef = 254040CA166AA0F100E13304 /* ZXQRCodeBlackBox1TestCase.m */; };
-		023E699C18C0EF26001FF123 /* ZXQRCodeBlackBox2TestCase.m in Sources */ = {isa = PBXBuildFile; fileRef = 254040CC166AA0F100E13304 /* ZXQRCodeBlackBox2TestCase.m */; };
-		023E699D18C0EF26001FF123 /* ZXQRCodeBlackBox3TestCase.m in Sources */ = {isa = PBXBuildFile; fileRef = 254040CE166AA0F100E13304 /* ZXQRCodeBlackBox3TestCase.m */; };
-		023E699E18C0EF26001FF123 /* ZXQRCodeBlackBox4TestCase.m in Sources */ = {isa = PBXBuildFile; fileRef = 254040D0166AA0F100E13304 /* ZXQRCodeBlackBox4TestCase.m */; };
-		023E699F18C0EF26001FF123 /* ZXQRCodeBlackBox5TestCase.m in Sources */ = {isa = PBXBuildFile; fileRef = 254040D2166AA0F100E13304 /* ZXQRCodeBlackBox5TestCase.m */; };
-		023E69A018C0EF26001FF123 /* ZXQRCodeBlackBox6TestCase.m in Sources */ = {isa = PBXBuildFile; fileRef = 254040D4166AA0F100E13304 /* ZXQRCodeBlackBox6TestCase.m */; };
 		023E69A118C0EF55001FF123 /* ZXAztecBlackBox1TestCase.m in Sources */ = {isa = PBXBuildFile; fileRef = 25403FEF166AA0F100E13304 /* ZXAztecBlackBox1TestCase.m */; };
 		023E69A218C0EF55001FF123 /* ZXAztecBlackBox2TestCase.m in Sources */ = {isa = PBXBuildFile; fileRef = 25403FF1166AA0F100E13304 /* ZXAztecBlackBox2TestCase.m */; };
 		023E69A318C0EF55001FF123 /* ZXAbstractBlackBoxTestCase.m in Sources */ = {isa = PBXBuildFile; fileRef = 2540400E166AA0F100E13304 /* ZXAbstractBlackBoxTestCase.m */; };
@@ -370,7 +311,6 @@
 		024A231618D3747C006AE14A /* ZXQRCodeDecoderMetaData.m in Sources */ = {isa = PBXBuildFile; fileRef = 024A231218D3747C006AE14A /* ZXQRCodeDecoderMetaData.m */; };
 		024A231718D3747C006AE14A /* ZXQRCodeDecoderMetaData.m in Sources */ = {isa = PBXBuildFile; fileRef = 024A231218D3747C006AE14A /* ZXQRCodeDecoderMetaData.m */; };
 		024A231818D3747C006AE14A /* ZXQRCodeDecoderMetaData.m in Sources */ = {isa = PBXBuildFile; fileRef = 024A231218D3747C006AE14A /* ZXQRCodeDecoderMetaData.m */; };
-		024A231C18D3B292006AE14A /* ZXAztecDetectorTest.m in Sources */ = {isa = PBXBuildFile; fileRef = 024A231B18D3B292006AE14A /* ZXAztecDetectorTest.m */; };
 		024A231D18D3B292006AE14A /* ZXAztecDetectorTest.m in Sources */ = {isa = PBXBuildFile; fileRef = 024A231B18D3B292006AE14A /* ZXAztecDetectorTest.m */; };
 		024D310F19104B77008C0C89 /* ZXByteMatrix.h in Headers */ = {isa = PBXBuildFile; fileRef = 024D310D19104B77008C0C89 /* ZXByteMatrix.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		024D311019104B77008C0C89 /* ZXByteMatrix.h in Headers */ = {isa = PBXBuildFile; fileRef = 024D310D19104B77008C0C89 /* ZXByteMatrix.h */; settings = {ATTRIBUTES = (Public, ); }; };
@@ -533,14 +473,12 @@
 		0294D18A190EE6C700BBACCB /* ZXingObjCPDF417.h in Headers */ = {isa = PBXBuildFile; fileRef = 0294D188190EE6C700BBACCB /* ZXingObjCPDF417.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		0294D18B190EE6C700BBACCB /* ZXingObjCPDF417.h in Headers */ = {isa = PBXBuildFile; fileRef = 0294D188190EE6C700BBACCB /* ZXingObjCPDF417.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		02B4884A17F5F10000E6285D /* Resources in Resources */ = {isa = PBXBuildFile; fileRef = 25FE5D4416D1997C00826CDB /* Resources */; };
-		02DD02611AC07BD2009E4D65 /* ZXMathUtilsTestCase.m in Sources */ = {isa = PBXBuildFile; fileRef = 02DD02601AC07BD2009E4D65 /* ZXMathUtilsTestCase.m */; };
 		02DD02621AC07BD2009E4D65 /* ZXMathUtilsTestCase.m in Sources */ = {isa = PBXBuildFile; fileRef = 02DD02601AC07BD2009E4D65 /* ZXMathUtilsTestCase.m */; };
-		02DD02951AC1C3B5009E4D65 /* ZXPlanarYUVLuminanceSourceTestCase.m in Sources */ = {isa = PBXBuildFile; fileRef = 02DD02941AC1C3B5009E4D65 /* ZXPlanarYUVLuminanceSourceTestCase.m */; };
 		02DD02961AC1C3B5009E4D65 /* ZXPlanarYUVLuminanceSourceTestCase.m in Sources */ = {isa = PBXBuildFile; fileRef = 02DD02941AC1C3B5009E4D65 /* ZXPlanarYUVLuminanceSourceTestCase.m */; };
-		02DD029A1AC1C648009E4D65 /* ZXPDF417EncoderTestCase.m in Sources */ = {isa = PBXBuildFile; fileRef = 02DD02991AC1C648009E4D65 /* ZXPDF417EncoderTestCase.m */; };
 		02DD029B1AC1C648009E4D65 /* ZXPDF417EncoderTestCase.m in Sources */ = {isa = PBXBuildFile; fileRef = 02DD02991AC1C648009E4D65 /* ZXPDF417EncoderTestCase.m */; };
-		02DD029F1AC1DBAD009E4D65 /* ZXAztecDecoderTest.m in Sources */ = {isa = PBXBuildFile; fileRef = 02DD029E1AC1DBAD009E4D65 /* ZXAztecDecoderTest.m */; };
 		02DD02A01AC1DBAD009E4D65 /* ZXAztecDecoderTest.m in Sources */ = {isa = PBXBuildFile; fileRef = 02DD029E1AC1DBAD009E4D65 /* ZXAztecDecoderTest.m */; };
+		0D1D54E11B2610E600B8AD53 /* ZXUPCEWriter.h in Headers */ = {isa = PBXBuildFile; fileRef = 0D1D54DF1B2610E600B8AD53 /* ZXUPCEWriter.h */; };
+		0D1D54E21B2610E600B8AD53 /* ZXUPCEWriter.m in Sources */ = {isa = PBXBuildFile; fileRef = 0D1D54E01B2610E600B8AD53 /* ZXUPCEWriter.m */; };
 		2504D9D016FFD2E200DF8882 /* ZXAztecCode.m in Sources */ = {isa = PBXBuildFile; fileRef = 2504D9CE16FFD2E200DF8882 /* ZXAztecCode.m */; };
 		2504D9D116FFD3A100DF8882 /* ZXAztecCode.h in Headers */ = {isa = PBXBuildFile; fileRef = 2504D9CD16FFD2E200DF8882 /* ZXAztecCode.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		2504D9D316FFD3B300DF8882 /* ZXAztecCode.m in Sources */ = {isa = PBXBuildFile; fileRef = 2504D9CE16FFD2E200DF8882 /* ZXAztecCode.m */; };
@@ -550,8 +488,6 @@
 		2504D9E016FFEB7B00DF8882 /* ZXAztecEncoder.m in Sources */ = {isa = PBXBuildFile; fileRef = 2504D9DB16FFD4CD00DF8882 /* ZXAztecEncoder.m */; };
 		2504D9E216FFEB8100DF8882 /* ZXAztecEncoder.h in Headers */ = {isa = PBXBuildFile; fileRef = 2504D9DA16FFD4CD00DF8882 /* ZXAztecEncoder.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		2504D9E816FFF27C00DF8882 /* ZXAztecEncoderTest.m in Sources */ = {isa = PBXBuildFile; fileRef = 2504D9E516FFF27C00DF8882 /* ZXAztecEncoderTest.m */; };
-		2504D9E916FFF2A900DF8882 /* ZXAztecEncoderTest.m in Sources */ = {isa = PBXBuildFile; fileRef = 2504D9E516FFF27C00DF8882 /* ZXAztecEncoderTest.m */; };
-		2504D9EC170005FE00DF8882 /* ZXReedSolomonTestCase.m in Sources */ = {isa = PBXBuildFile; fileRef = 2504D9EB170005FE00DF8882 /* ZXReedSolomonTestCase.m */; };
 		2504D9ED170005FE00DF8882 /* ZXReedSolomonTestCase.m in Sources */ = {isa = PBXBuildFile; fileRef = 2504D9EB170005FE00DF8882 /* ZXReedSolomonTestCase.m */; };
 		2519AB3517FD1EC000A71C45 /* ZXAztecWriter.h in Headers */ = {isa = PBXBuildFile; fileRef = 2519AB3217FD1EC000A71C45 /* ZXAztecWriter.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		2519AB3717FD1EC000A71C45 /* ZXAztecWriter.m in Sources */ = {isa = PBXBuildFile; fileRef = 2519AB3317FD1EC000A71C45 /* ZXAztecWriter.m */; };
@@ -611,8 +547,6 @@
 		25389B8D18010B9A00772392 /* ZXPDF417DetectorResult.m in Sources */ = {isa = PBXBuildFile; fileRef = 25389B8818010B9A00772392 /* ZXPDF417DetectorResult.m */; };
 		25389B8E18010B9A00772392 /* ZXPDF417DetectorResult.m in Sources */ = {isa = PBXBuildFile; fileRef = 25389B8818010B9A00772392 /* ZXPDF417DetectorResult.m */; };
 		25403CB7166A96FA00E13304 /* Foundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 25403CB6166A96FA00E13304 /* Foundation.framework */; };
-		25403CC9166A96FA00E13304 /* Foundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 25403CB6166A96FA00E13304 /* Foundation.framework */; };
-		25403CCC166A96FA00E13304 /* libZXingObjC-iOS.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 25403CB3166A96FA00E13304 /* libZXingObjC-iOS.a */; };
 		25403CE3166A98C700E13304 /* ZXingObjC.h in Headers */ = {isa = PBXBuildFile; fileRef = 25403CBB166A96FA00E13304 /* ZXingObjC.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		25403CF8166A999D00E13304 /* ZXAztecDecoder.m in Sources */ = {isa = PBXBuildFile; fileRef = 25403CEF166A999D00E13304 /* ZXAztecDecoder.m */; };
 		25403CFA166A999D00E13304 /* ZXAztecDetector.m in Sources */ = {isa = PBXBuildFile; fileRef = 25403CF2166A999D00E13304 /* ZXAztecDetector.m */; };
@@ -775,60 +709,7 @@
 		25403FB6166A9F2D00E13304 /* ZXQRCode.m in Sources */ = {isa = PBXBuildFile; fileRef = 25403F88166A9F2D00E13304 /* ZXQRCode.m */; };
 		25403FB8166A9F2D00E13304 /* ZXQRCodeReader.m in Sources */ = {isa = PBXBuildFile; fileRef = 25403F8A166A9F2D00E13304 /* ZXQRCodeReader.m */; };
 		25403FBA166A9F2D00E13304 /* ZXQRCodeWriter.m in Sources */ = {isa = PBXBuildFile; fileRef = 25403F8C166A9F2D00E13304 /* ZXQRCodeWriter.m */; };
-		254040D9166AA0F100E13304 /* ZXAddressBookParsedResultTestCase.m in Sources */ = {isa = PBXBuildFile; fileRef = 25403FF5166AA0F100E13304 /* ZXAddressBookParsedResultTestCase.m */; };
-		254040DA166AA0F100E13304 /* ZXCalendarParsedResultTestCase.m in Sources */ = {isa = PBXBuildFile; fileRef = 25403FF7166AA0F100E13304 /* ZXCalendarParsedResultTestCase.m */; };
-		254040DB166AA0F100E13304 /* ZXEmailAddressParsedResultTestCase.m in Sources */ = {isa = PBXBuildFile; fileRef = 25403FF9166AA0F100E13304 /* ZXEmailAddressParsedResultTestCase.m */; };
-		254040DC166AA0F100E13304 /* ZXExpandedProductParsedResultTestCase.m in Sources */ = {isa = PBXBuildFile; fileRef = 25403FFB166AA0F100E13304 /* ZXExpandedProductParsedResultTestCase.m */; };
-		254040DD166AA0F100E13304 /* ZXGeoParsedResultTestCase.m in Sources */ = {isa = PBXBuildFile; fileRef = 25403FFD166AA0F100E13304 /* ZXGeoParsedResultTestCase.m */; };
-		254040DE166AA0F100E13304 /* ZXISBNParsedResultTestCase.m in Sources */ = {isa = PBXBuildFile; fileRef = 25403FFF166AA0F100E13304 /* ZXISBNParsedResultTestCase.m */; };
-		254040DF166AA0F100E13304 /* ZXParsedReaderResultTestCase.m in Sources */ = {isa = PBXBuildFile; fileRef = 25404001166AA0F100E13304 /* ZXParsedReaderResultTestCase.m */; };
-		254040E0166AA0F100E13304 /* ZXProductParsedResultTestCase.m in Sources */ = {isa = PBXBuildFile; fileRef = 25404003166AA0F100E13304 /* ZXProductParsedResultTestCase.m */; };
-		254040E1166AA0F100E13304 /* ZXSMSMMSParsedResultTestCase.m in Sources */ = {isa = PBXBuildFile; fileRef = 25404005166AA0F100E13304 /* ZXSMSMMSParsedResultTestCase.m */; };
-		254040E2166AA0F100E13304 /* ZXTelParsedResultTestCase.m in Sources */ = {isa = PBXBuildFile; fileRef = 25404007166AA0F100E13304 /* ZXTelParsedResultTestCase.m */; };
-		254040E3166AA0F100E13304 /* ZXURIParsedResultTestCase.m in Sources */ = {isa = PBXBuildFile; fileRef = 25404009166AA0F100E13304 /* ZXURIParsedResultTestCase.m */; };
-		254040E4166AA0F100E13304 /* ZXWifiParsedResultTestCase.m in Sources */ = {isa = PBXBuildFile; fileRef = 2540400B166AA0F100E13304 /* ZXWifiParsedResultTestCase.m */; };
-		254040EC166AA0F100E13304 /* ZXBitArrayTestCase.m in Sources */ = {isa = PBXBuildFile; fileRef = 2540401D166AA0F100E13304 /* ZXBitArrayTestCase.m */; };
-		254040ED166AA0F100E13304 /* ZXBitMatrixTestCase.m in Sources */ = {isa = PBXBuildFile; fileRef = 2540401F166AA0F100E13304 /* ZXBitMatrixTestCase.m */; };
-		254040EE166AA0F100E13304 /* ZXBitSourceBuilder.m in Sources */ = {isa = PBXBuildFile; fileRef = 25404021166AA0F100E13304 /* ZXBitSourceBuilder.m */; };
-		254040EF166AA0F100E13304 /* ZXBitSourceTestCase.m in Sources */ = {isa = PBXBuildFile; fileRef = 25404023166AA0F100E13304 /* ZXBitSourceTestCase.m */; };
-		254040F0166AA0F100E13304 /* ZXPerspectiveTransformTestCase.m in Sources */ = {isa = PBXBuildFile; fileRef = 25404025166AA0F100E13304 /* ZXPerspectiveTransformTestCase.m */; };
-		254040F1166AA0F100E13304 /* ZXStringUtilsTestCase.m in Sources */ = {isa = PBXBuildFile; fileRef = 25404027166AA0F100E13304 /* ZXStringUtilsTestCase.m */; };
-		254040F4166AA0F100E13304 /* ZXDataMatrixDecodedBitStreamParserTestCase.m in Sources */ = {isa = PBXBuildFile; fileRef = 2540402F166AA0F100E13304 /* ZXDataMatrixDecodedBitStreamParserTestCase.m */; };
-		25404109166AA0F100E13304 /* ZXAbstractExpandedDecoderTest.m in Sources */ = {isa = PBXBuildFile; fileRef = 2540405E166AA0F100E13304 /* ZXAbstractExpandedDecoderTest.m */; };
-		2540410A166AA0F100E13304 /* ZXAI01_3103_DecoderTest.m in Sources */ = {isa = PBXBuildFile; fileRef = 25404060166AA0F100E13304 /* ZXAI01_3103_DecoderTest.m */; };
-		2540410B166AA0F100E13304 /* ZXAI01_3202_3203_DecoderTest.m in Sources */ = {isa = PBXBuildFile; fileRef = 25404062166AA0F100E13304 /* ZXAI01_3202_3203_DecoderTest.m */; };
-		2540410C166AA0F100E13304 /* ZXAI01_3X0X_1X_DecoderTest.m in Sources */ = {isa = PBXBuildFile; fileRef = 25404064166AA0F100E13304 /* ZXAI01_3X0X_1X_DecoderTest.m */; };
-		2540410D166AA0F100E13304 /* ZXAnyAIDecoderTest.m in Sources */ = {isa = PBXBuildFile; fileRef = 25404066166AA0F100E13304 /* ZXAnyAIDecoderTest.m */; };
-		2540410E166AA0F100E13304 /* ZXRSSExpandedFieldParserTest.m in Sources */ = {isa = PBXBuildFile; fileRef = 25404068166AA0F100E13304 /* ZXRSSExpandedFieldParserTest.m */; };
-		25404112166AA0F100E13304 /* ZXRSSExpandedImage2binaryTestCase.m in Sources */ = {isa = PBXBuildFile; fileRef = 25404070166AA0F100E13304 /* ZXRSSExpandedImage2binaryTestCase.m */; };
-		25404113166AA0F100E13304 /* ZXRSSExpandedImage2resultTestCase.m in Sources */ = {isa = PBXBuildFile; fileRef = 25404072166AA0F100E13304 /* ZXRSSExpandedImage2resultTestCase.m */; };
-		25404114166AA0F100E13304 /* ZXRSSExpandedImage2stringTestCase.m in Sources */ = {isa = PBXBuildFile; fileRef = 25404074166AA0F100E13304 /* ZXRSSExpandedImage2stringTestCase.m */; };
-		25404115166AA0F100E13304 /* ZXRSSExpandedInternalTestCase.m in Sources */ = {isa = PBXBuildFile; fileRef = 25404076166AA0F100E13304 /* ZXRSSExpandedInternalTestCase.m */; };
-		25404116166AA0F100E13304 /* ZXBinaryUtil.m in Sources */ = {isa = PBXBuildFile; fileRef = 25404078166AA0F100E13304 /* ZXBinaryUtil.m */; };
-		25404117166AA0F100E13304 /* ZXBinaryUtilTest.m in Sources */ = {isa = PBXBuildFile; fileRef = 2540407A166AA0F100E13304 /* ZXBinaryUtilTest.m */; };
-		25404118166AA0F100E13304 /* ZXBitArrayBuilderTest.m in Sources */ = {isa = PBXBuildFile; fileRef = 2540407C166AA0F100E13304 /* ZXBitArrayBuilderTest.m */; };
-		25404119166AA0F100E13304 /* ZXRSSExpandedInformationDecoderTest.m in Sources */ = {isa = PBXBuildFile; fileRef = 2540407E166AA0F100E13304 /* ZXRSSExpandedInformationDecoderTest.m */; };
-		25404126166AA0F100E13304 /* ZXCodaBarWriterTestCase.m in Sources */ = {isa = PBXBuildFile; fileRef = 25404098166AA0F100E13304 /* ZXCodaBarWriterTestCase.m */; };
-		25404128166AA0F100E13304 /* ZXEAN13WriterTestCase.m in Sources */ = {isa = PBXBuildFile; fileRef = 2540409C166AA0F100E13304 /* ZXEAN13WriterTestCase.m */; };
-		25404129166AA0F100E13304 /* ZXEAN8WriterTestCase.m in Sources */ = {isa = PBXBuildFile; fileRef = 2540409E166AA0F100E13304 /* ZXEAN8WriterTestCase.m */; };
-		2540412A166AA0F100E13304 /* ZXEANManufacturerOrgSupportTest.m in Sources */ = {isa = PBXBuildFile; fileRef = 254040A0166AA0F100E13304 /* ZXEANManufacturerOrgSupportTest.m */; };
-		2540412C166AA0F100E13304 /* ZXUPCAWriterTestCase.m in Sources */ = {isa = PBXBuildFile; fileRef = 254040A4166AA0F100E13304 /* ZXUPCAWriterTestCase.m */; };
-		2540412D166AA0F100E13304 /* ZXPDF417AbstractErrorCorrectionTestCase.m in Sources */ = {isa = PBXBuildFile; fileRef = 254040A9166AA0F100E13304 /* ZXPDF417AbstractErrorCorrectionTestCase.m */; };
-		2540412E166AA0F100E13304 /* ZXPDF417ECErrorCorrectionTestCase.m in Sources */ = {isa = PBXBuildFile; fileRef = 254040AB166AA0F100E13304 /* ZXPDF417ECErrorCorrectionTestCase.m */; };
-		25404131166AA0F100E13304 /* ZXQRCodeDataMaskTestCase.m in Sources */ = {isa = PBXBuildFile; fileRef = 254040B3166AA0F100E13304 /* ZXQRCodeDataMaskTestCase.m */; };
-		25404132166AA0F100E13304 /* ZXQRCodeErrorCorrectionLevelTestCase.m in Sources */ = {isa = PBXBuildFile; fileRef = 254040B5166AA0F100E13304 /* ZXQRCodeErrorCorrectionLevelTestCase.m */; };
-		25404133166AA0F100E13304 /* ZXQRCodeFormatInformationTestCase.m in Sources */ = {isa = PBXBuildFile; fileRef = 254040B7166AA0F100E13304 /* ZXQRCodeFormatInformationTestCase.m */; };
-		25404134166AA0F100E13304 /* ZXQRCodeModeTestCase.m in Sources */ = {isa = PBXBuildFile; fileRef = 254040B9166AA0F100E13304 /* ZXQRCodeModeTestCase.m */; };
-		25404135166AA0F100E13304 /* ZXQRCodeDecodedBitStreamParserTestCase.m in Sources */ = {isa = PBXBuildFile; fileRef = 254040BB166AA0F100E13304 /* ZXQRCodeDecodedBitStreamParserTestCase.m */; };
-		25404136166AA0F100E13304 /* ZXQRCodeVersionTestCase.m in Sources */ = {isa = PBXBuildFile; fileRef = 254040BD166AA0F100E13304 /* ZXQRCodeVersionTestCase.m */; };
-		25404137166AA0F100E13304 /* ZXBitVectorTestCase.m in Sources */ = {isa = PBXBuildFile; fileRef = 254040C0166AA0F100E13304 /* ZXBitVectorTestCase.m */; };
-		25404138166AA0F100E13304 /* ZXQRCodeEncoderTestCase.m in Sources */ = {isa = PBXBuildFile; fileRef = 254040C2166AA0F100E13304 /* ZXQRCodeEncoderTestCase.m */; };
-		25404139166AA0F100E13304 /* ZXQRCodeMaskUtilTestCase.m in Sources */ = {isa = PBXBuildFile; fileRef = 254040C4166AA0F100E13304 /* ZXQRCodeMaskUtilTestCase.m */; };
-		2540413A166AA0F100E13304 /* ZXQRCodeMatrixUtilTestCase.m in Sources */ = {isa = PBXBuildFile; fileRef = 254040C6166AA0F100E13304 /* ZXQRCodeMatrixUtilTestCase.m */; };
-		2540413B166AA0F100E13304 /* ZXQRCodeTestCase.m in Sources */ = {isa = PBXBuildFile; fileRef = 254040C8166AA0F100E13304 /* ZXQRCodeTestCase.m */; };
-		25404142166AA0F100E13304 /* ZXQRCodeWriterTestCase.m in Sources */ = {isa = PBXBuildFile; fileRef = 254040D6166AA0F100E13304 /* ZXQRCodeWriterTestCase.m */; };
 		25404146166AA16200E13304 /* UIKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 25404145166AA16200E13304 /* UIKit.framework */; };
-		25404160166AAAAB00E13304 /* UIKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 25404145166AA16200E13304 /* UIKit.framework */; };
 		2540417D166AADAC00E13304 /* libZXingObjC-osx.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 25404166166AADAC00E13304 /* libZXingObjC-osx.a */; };
 		2540418F166AAE6000E13304 /* ZXAztecDecoder.m in Sources */ = {isa = PBXBuildFile; fileRef = 25403CEF166A999D00E13304 /* ZXAztecDecoder.m */; };
 		25404190166AAE6000E13304 /* ZXAztecDetector.m in Sources */ = {isa = PBXBuildFile; fileRef = 25403CF2166A999D00E13304 /* ZXAztecDetector.m */; };
@@ -1314,7 +1195,6 @@
 		254046F0166ABBED00E13304 /* ZXQRCodeReader.m in Sources */ = {isa = PBXBuildFile; fileRef = 25403F8A166A9F2D00E13304 /* ZXQRCodeReader.m */; };
 		254046F1166ABBED00E13304 /* ZXQRCodeWriter.m in Sources */ = {isa = PBXBuildFile; fileRef = 25403F8C166A9F2D00E13304 /* ZXQRCodeWriter.m */; };
 		2540471B166AC21000E13304 /* AVFoundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 2540471A166AC21000E13304 /* AVFoundation.framework */; };
-		2540471C166AC21D00E13304 /* AVFoundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 2540471A166AC21000E13304 /* AVFoundation.framework */; };
 		2542997E16D470D600D4C045 /* ZXDataMatrixWriter.m in Sources */ = {isa = PBXBuildFile; fileRef = 2542997C16D470D600D4C045 /* ZXDataMatrixWriter.m */; };
 		2542997F16D470E600D4C045 /* ZXDataMatrixWriter.h in Headers */ = {isa = PBXBuildFile; fileRef = 2542997B16D470D600D4C045 /* ZXDataMatrixWriter.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		2542998116D470F300D4C045 /* ZXDataMatrixWriter.m in Sources */ = {isa = PBXBuildFile; fileRef = 2542997C16D470D600D4C045 /* ZXDataMatrixWriter.m */; };
@@ -1366,17 +1246,11 @@
 		254299F016D5D94B00D4C045 /* ZXDataMatrixX12Encoder.m in Sources */ = {isa = PBXBuildFile; fileRef = 254299EC16D5D94A00D4C045 /* ZXDataMatrixX12Encoder.m */; };
 		254299F116D5D94B00D4C045 /* ZXDataMatrixX12Encoder.m in Sources */ = {isa = PBXBuildFile; fileRef = 254299EC16D5D94A00D4C045 /* ZXDataMatrixX12Encoder.m */; };
 		254299F216D5D94B00D4C045 /* ZXDataMatrixX12Encoder.m in Sources */ = {isa = PBXBuildFile; fileRef = 254299EC16D5D94A00D4C045 /* ZXDataMatrixX12Encoder.m */; };
-		254299FB16D5DCC000D4C045 /* ZXDataMatrixWriterTestCase.m in Sources */ = {isa = PBXBuildFile; fileRef = 254299F416D5DC8E00D4C045 /* ZXDataMatrixWriterTestCase.m */; };
 		254299FC16D5DCC300D4C045 /* ZXDataMatrixWriterTestCase.m in Sources */ = {isa = PBXBuildFile; fileRef = 254299F416D5DC8E00D4C045 /* ZXDataMatrixWriterTestCase.m */; };
-		25429A0016D5DFD800D4C045 /* ZXDataMatrixDebugPlacement.m in Sources */ = {isa = PBXBuildFile; fileRef = 254299FF16D5DFD800D4C045 /* ZXDataMatrixDebugPlacement.m */; };
 		25429A0116D5DFD800D4C045 /* ZXDataMatrixDebugPlacement.m in Sources */ = {isa = PBXBuildFile; fileRef = 254299FF16D5DFD800D4C045 /* ZXDataMatrixDebugPlacement.m */; };
-		25429A0416D5E0ED00D4C045 /* ZXDataMatrixErrorCorrectionTestCase.m in Sources */ = {isa = PBXBuildFile; fileRef = 25429A0316D5E0ED00D4C045 /* ZXDataMatrixErrorCorrectionTestCase.m */; };
 		25429A0516D5E0ED00D4C045 /* ZXDataMatrixErrorCorrectionTestCase.m in Sources */ = {isa = PBXBuildFile; fileRef = 25429A0316D5E0ED00D4C045 /* ZXDataMatrixErrorCorrectionTestCase.m */; };
-		25429A0816D5E21C00D4C045 /* ZXDataMatrixHighLevelEncodeTestCase.m in Sources */ = {isa = PBXBuildFile; fileRef = 25429A0716D5E21C00D4C045 /* ZXDataMatrixHighLevelEncodeTestCase.m */; };
 		25429A0916D5E21C00D4C045 /* ZXDataMatrixHighLevelEncodeTestCase.m in Sources */ = {isa = PBXBuildFile; fileRef = 25429A0716D5E21C00D4C045 /* ZXDataMatrixHighLevelEncodeTestCase.m */; };
-		25429A0C16D5F4E000D4C045 /* ZXDataMatrixPlacementTestCase.m in Sources */ = {isa = PBXBuildFile; fileRef = 25429A0B16D5F4E000D4C045 /* ZXDataMatrixPlacementTestCase.m */; };
 		25429A0D16D5F4E000D4C045 /* ZXDataMatrixPlacementTestCase.m in Sources */ = {isa = PBXBuildFile; fileRef = 25429A0B16D5F4E000D4C045 /* ZXDataMatrixPlacementTestCase.m */; };
-		25429A1016D5F66D00D4C045 /* ZXDataMatrixSymbolInfoTestCase.m in Sources */ = {isa = PBXBuildFile; fileRef = 25429A0F16D5F66D00D4C045 /* ZXDataMatrixSymbolInfoTestCase.m */; };
 		25429A1116D5F66D00D4C045 /* ZXDataMatrixSymbolInfoTestCase.m in Sources */ = {isa = PBXBuildFile; fileRef = 25429A0F16D5F66D00D4C045 /* ZXDataMatrixSymbolInfoTestCase.m */; };
 		255B9DB216FFCDE100EEEE61 /* ZXDataMatrixEncoder.h in Headers */ = {isa = PBXBuildFile; fileRef = 2542998C16D478F800D4C045 /* ZXDataMatrixEncoder.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		255E481E18143A3900A03A28 /* ZXRSSExpandedStackedInternalTestCase.m in Sources */ = {isa = PBXBuildFile; fileRef = 25FE5D3F16D0B84C00826CDB /* ZXRSSExpandedStackedInternalTestCase.m */; };
@@ -1636,7 +1510,6 @@
 		255E493918143AC600A03A28 /* ZXModulusGF.h in Headers */ = {isa = PBXBuildFile; fileRef = 25403F1B166A9EB500E13304 /* ZXModulusGF.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		255E493A18143AC600A03A28 /* ZXModulusPoly.h in Headers */ = {isa = PBXBuildFile; fileRef = 25403F1D166A9EB500E13304 /* ZXModulusPoly.h */; };
 		255E493B18143AC600A03A28 /* ZXPDF417ECErrorCorrection.h in Headers */ = {isa = PBXBuildFile; fileRef = 25403F1F166A9EB500E13304 /* ZXPDF417ECErrorCorrection.h */; settings = {ATTRIBUTES = (Public, ); }; };
-		255E986C18DF258C000A2681 /* ZXCode128WriterTestCase.m in Sources */ = {isa = PBXBuildFile; fileRef = 255E986B18DF258C000A2681 /* ZXCode128WriterTestCase.m */; };
 		255E986D18DF258C000A2681 /* ZXCode128WriterTestCase.m in Sources */ = {isa = PBXBuildFile; fileRef = 255E986B18DF258C000A2681 /* ZXCode128WriterTestCase.m */; };
 		25B62DF818DDDDB5004782B1 /* ZXVINParsedResult.h in Headers */ = {isa = PBXBuildFile; fileRef = 25B62DF518DDDDB5004782B1 /* ZXVINParsedResult.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		25B62DF918DDDDB5004782B1 /* ZXVINParsedResult.h in Headers */ = {isa = PBXBuildFile; fileRef = 25B62DF518DDDDB5004782B1 /* ZXVINParsedResult.h */; settings = {ATTRIBUTES = (Public, ); }; };
@@ -1648,14 +1521,10 @@
 		25B62E0218DDE603004782B1 /* ZXVINResultParser.m in Sources */ = {isa = PBXBuildFile; fileRef = 25B62DFE18DDE603004782B1 /* ZXVINResultParser.m */; };
 		25B62E0318DDE603004782B1 /* ZXVINResultParser.m in Sources */ = {isa = PBXBuildFile; fileRef = 25B62DFE18DDE603004782B1 /* ZXVINResultParser.m */; };
 		25B62E0418DDE603004782B1 /* ZXVINResultParser.m in Sources */ = {isa = PBXBuildFile; fileRef = 25B62DFE18DDE603004782B1 /* ZXVINResultParser.m */; };
-		25B62E0718DDE9AA004782B1 /* ZXVINParsedResultTestCase.m in Sources */ = {isa = PBXBuildFile; fileRef = 25B62E0618DDE9AA004782B1 /* ZXVINParsedResultTestCase.m */; };
 		25B62E0818DDE9AA004782B1 /* ZXVINParsedResultTestCase.m in Sources */ = {isa = PBXBuildFile; fileRef = 25B62E0618DDE9AA004782B1 /* ZXVINParsedResultTestCase.m */; };
 		25FE5D3416D0AFED00826CDB /* ZXRSSExpandedRow.m in Sources */ = {isa = PBXBuildFile; fileRef = 25FE5D3216D0AFED00826CDB /* ZXRSSExpandedRow.m */; };
 		25FE5D3616D0B00600826CDB /* ZXRSSExpandedRow.m in Sources */ = {isa = PBXBuildFile; fileRef = 25FE5D3216D0AFED00826CDB /* ZXRSSExpandedRow.m */; };
 		25FE5D3716D0B00700826CDB /* ZXRSSExpandedRow.m in Sources */ = {isa = PBXBuildFile; fileRef = 25FE5D3216D0AFED00826CDB /* ZXRSSExpandedRow.m */; };
-		25FE5D4016D0B84C00826CDB /* ZXRSSExpandedStackedInternalTestCase.m in Sources */ = {isa = PBXBuildFile; fileRef = 25FE5D3F16D0B84C00826CDB /* ZXRSSExpandedStackedInternalTestCase.m */; };
-		25FE5D4316D0B8B200826CDB /* ZXTestCaseUtil.m in Sources */ = {isa = PBXBuildFile; fileRef = 25FE5D4216D0B8B200826CDB /* ZXTestCaseUtil.m */; };
-		25FE5D4516D1997C00826CDB /* Resources in Resources */ = {isa = PBXBuildFile; fileRef = 25FE5D4416D1997C00826CDB /* Resources */; };
 		DB7257521A52420400EFF81B /* ZXAztecDecoder.m in Sources */ = {isa = PBXBuildFile; fileRef = 25403CEF166A999D00E13304 /* ZXAztecDecoder.m */; };
 		DB7257531A52420400EFF81B /* ZXAztecWriter.m in Sources */ = {isa = PBXBuildFile; fileRef = 2519AB3317FD1EC000A71C45 /* ZXAztecWriter.m */; };
 		DB7257541A52420400EFF81B /* ZXAztecDetector.m in Sources */ = {isa = PBXBuildFile; fileRef = 25403CF2166A999D00E13304 /* ZXAztecDetector.m */; };
@@ -2122,13 +1991,6 @@
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
-		25403CCA166A96FA00E13304 /* PBXContainerItemProxy */ = {
-			isa = PBXContainerItemProxy;
-			containerPortal = 25403CAA166A96F900E13304 /* Project object */;
-			proxyType = 1;
-			remoteGlobalIDString = 25403CB2166A96FA00E13304;
-			remoteInfo = ZXingObjC;
-		};
 		2540417B166AADAC00E13304 /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
 			containerPortal = 25403CAA166A96F900E13304 /* Project object */;
@@ -2226,6 +2088,8 @@
 		02DD02991AC1C648009E4D65 /* ZXPDF417EncoderTestCase.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = ZXPDF417EncoderTestCase.m; sourceTree = "<group>"; };
 		02DD029D1AC1DBAD009E4D65 /* ZXAztecDecoderTest.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ZXAztecDecoderTest.h; sourceTree = "<group>"; };
 		02DD029E1AC1DBAD009E4D65 /* ZXAztecDecoderTest.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = ZXAztecDecoderTest.m; sourceTree = "<group>"; };
+		0D1D54DF1B2610E600B8AD53 /* ZXUPCEWriter.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ZXUPCEWriter.h; sourceTree = "<group>"; };
+		0D1D54E01B2610E600B8AD53 /* ZXUPCEWriter.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = ZXUPCEWriter.m; sourceTree = "<group>"; };
 		2504D9CD16FFD2E200DF8882 /* ZXAztecCode.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = ZXAztecCode.h; path = encoder/ZXAztecCode.h; sourceTree = "<group>"; };
 		2504D9CE16FFD2E200DF8882 /* ZXAztecCode.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = ZXAztecCode.m; path = encoder/ZXAztecCode.m; sourceTree = "<group>"; };
 		2504D9DA16FFD4CD00DF8882 /* ZXAztecEncoder.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = ZXAztecEncoder.h; path = encoder/ZXAztecEncoder.h; sourceTree = "<group>"; };
@@ -2265,7 +2129,6 @@
 		25403CB3166A96FA00E13304 /* libZXingObjC-iOS.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; path = "libZXingObjC-iOS.a"; sourceTree = BUILT_PRODUCTS_DIR; };
 		25403CB6166A96FA00E13304 /* Foundation.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Foundation.framework; path = System/Library/Frameworks/Foundation.framework; sourceTree = SDKROOT; };
 		25403CBB166A96FA00E13304 /* ZXingObjC.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = ZXingObjC.h; sourceTree = "<group>"; };
-		25403CC4166A96FA00E13304 /* Unit Tests iOS.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = "Unit Tests iOS.xctest"; sourceTree = BUILT_PRODUCTS_DIR; };
 		25403CE1166A979700E13304 /* ios-Prefix.pch */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "ios-Prefix.pch"; sourceTree = SOURCE_ROOT; };
 		25403CEE166A999D00E13304 /* ZXAztecDecoder.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ZXAztecDecoder.h; sourceTree = "<group>"; };
 		25403CEF166A999D00E13304 /* ZXAztecDecoder.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = ZXAztecDecoder.m; sourceTree = "<group>"; };
@@ -2885,22 +2748,6 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
-		25403CC0166A96FA00E13304 /* Frameworks */ = {
-			isa = PBXFrameworksBuildPhase;
-			buildActionMask = 2147483647;
-			files = (
-				2540471C166AC21D00E13304 /* AVFoundation.framework in Frameworks */,
-				0217453C18E35B2F00864750 /* CoreGraphics.framework in Frameworks */,
-				0217454918E35C3700864750 /* CoreMedia.framework in Frameworks */,
-				0217453918E35AFF00864750 /* CoreVideo.framework in Frameworks */,
-				25403CC9166A96FA00E13304 /* Foundation.framework in Frameworks */,
-				0217453618E35AEE00864750 /* ImageIO.framework in Frameworks */,
-				0217454A18E35C3E00864750 /* QuartzCore.framework in Frameworks */,
-				25404160166AAAAB00E13304 /* UIKit.framework in Frameworks */,
-				25403CCC166A96FA00E13304 /* libZXingObjC-iOS.a in Frameworks */,
-			);
-			runOnlyForDeploymentPostprocessing = 0;
-		};
 		25404163166AADAC00E13304 /* Frameworks */ = {
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
@@ -3102,13 +2949,14 @@
 				DB7254801A523C9200EFF81B /* iOS Framework */,
 				25403CB4166A96FA00E13304 /* Products */,
 			);
+			indentWidth = 2;
 			sourceTree = "<group>";
+			tabWidth = 2;
 		};
 		25403CB4166A96FA00E13304 /* Products */ = {
 			isa = PBXGroup;
 			children = (
 				25403CB3166A96FA00E13304 /* libZXingObjC-iOS.a */,
-				25403CC4166A96FA00E13304 /* Unit Tests iOS.xctest */,
 				25404166166AADAC00E13304 /* libZXingObjC-osx.a */,
 				25404178166AADAC00E13304 /* Unit Tests OS X.xctest */,
 				2540439E166ABA0A00E13304 /* ZXingObjC.framework */,
@@ -3512,6 +3360,8 @@
 				25403EA9166A9DF300E13304 /* ZXUPCEANWriter.m */,
 				25403EAA166A9DF300E13304 /* ZXUPCEReader.h */,
 				25403EAB166A9DF300E13304 /* ZXUPCEReader.m */,
+				0D1D54DF1B2610E600B8AD53 /* ZXUPCEWriter.h */,
+				0D1D54E01B2610E600B8AD53 /* ZXUPCEWriter.m */,
 			);
 			path = oned;
 			sourceTree = "<group>";
@@ -4428,6 +4278,7 @@
 				0210FB8C18E0A62200B1F4CE /* ZXGenericGFPoly.h in Headers */,
 				0294D14D190ED90B00BBACCB /* ZXRGBLuminanceSource.h in Headers */,
 				0210FBAC18E0A82500B1F4CE /* ZXDataMatrixSymbolInfo144.h in Headers */,
+				0D1D54E11B2610E600B8AD53 /* ZXUPCEWriter.h in Headers */,
 				0210FB5F18E0A5FC00B1F4CE /* ZXAbstractDoCoMoResultParser.h in Headers */,
 				0294D13B190ED90B00BBACCB /* ZXResult.h in Headers */,
 				0210FC1418E0A9F700B1F4CE /* ZXQRCodeFormatInformation.h in Headers */,
@@ -5198,24 +5049,6 @@
 			productReference = 25403CB3166A96FA00E13304 /* libZXingObjC-iOS.a */;
 			productType = "com.apple.product-type.library.static";
 		};
-		25403CC3166A96FA00E13304 /* Unit Tests iOS */ = {
-			isa = PBXNativeTarget;
-			buildConfigurationList = 25403CDB166A96FA00E13304 /* Build configuration list for PBXNativeTarget "Unit Tests iOS" */;
-			buildPhases = (
-				25403CBF166A96FA00E13304 /* Sources */,
-				25403CC0166A96FA00E13304 /* Frameworks */,
-				25403CC1166A96FA00E13304 /* Resources */,
-			);
-			buildRules = (
-			);
-			dependencies = (
-				25403CCB166A96FA00E13304 /* PBXTargetDependency */,
-			);
-			name = "Unit Tests iOS";
-			productName = ZXingObjCTests;
-			productReference = 25403CC4166A96FA00E13304 /* Unit Tests iOS.xctest */;
-			productType = "com.apple.product-type.bundle.unit-test";
-		};
 		25404165166AADAC00E13304 /* ZXingObjC-osx */ = {
 			isa = PBXNativeTarget;
 			buildConfigurationList = 25404187166AADAD00E13304 /* Build configuration list for PBXNativeTarget "ZXingObjC-osx" */;
@@ -5319,7 +5152,6 @@
 			projectRoot = "";
 			targets = (
 				25403CB2166A96FA00E13304 /* ZXingObjC-iOS */,
-				25403CC3166A96FA00E13304 /* Unit Tests iOS */,
 				25404165166AADAC00E13304 /* ZXingObjC-osx */,
 				25404177166AADAC00E13304 /* Unit Tests OS X */,
 				2540439D166ABA0A00E13304 /* OS X Framework */,
@@ -5329,14 +5161,6 @@
 /* End PBXProject section */
 
 /* Begin PBXResourcesBuildPhase section */
-		25403CC1166A96FA00E13304 /* Resources */ = {
-			isa = PBXResourcesBuildPhase;
-			buildActionMask = 2147483647;
-			files = (
-				25FE5D4516D1997C00826CDB /* Resources in Resources */,
-			);
-			runOnlyForDeploymentPostprocessing = 0;
-		};
 		25404175166AADAC00E13304 /* Resources */ = {
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
@@ -5505,6 +5329,7 @@
 				25403EF3166A9DF400E13304 /* ZXEAN13Reader.m in Sources */,
 				25403EF5166A9DF400E13304 /* ZXEAN13Writer.m in Sources */,
 				25403EF7166A9DF400E13304 /* ZXEAN8Reader.m in Sources */,
+				0D1D54E21B2610E600B8AD53 /* ZXUPCEWriter.m in Sources */,
 				25403EF9166A9DF400E13304 /* ZXEAN8Writer.m in Sources */,
 				25389B8C18010B9A00772392 /* ZXPDF417DetectorResult.m in Sources */,
 				25403EFB166A9DF400E13304 /* ZXEANManufacturerOrgSupport.m in Sources */,
@@ -5586,136 +5411,6 @@
 				254299F016D5D94B00D4C045 /* ZXDataMatrixX12Encoder.m in Sources */,
 				2504D9D016FFD2E200DF8882 /* ZXAztecCode.m in Sources */,
 				2504D9DD16FFD4CD00DF8882 /* ZXAztecEncoder.m in Sources */,
-			);
-			runOnlyForDeploymentPostprocessing = 0;
-		};
-		25403CBF166A96FA00E13304 /* Sources */ = {
-			isa = PBXSourcesBuildPhase;
-			buildActionMask = 2147483647;
-			files = (
-				023E696B18C0EF26001FF123 /* ZXAztecBlackBox1TestCase.m in Sources */,
-				023E696C18C0EF26001FF123 /* ZXAztecBlackBox2TestCase.m in Sources */,
-				023E696D18C0EF26001FF123 /* ZXAbstractBlackBoxTestCase.m in Sources */,
-				023E696E18C0EF26001FF123 /* ZXAbstractNegativeBlackBoxTestCase.m in Sources */,
-				023E696F18C0EF26001FF123 /* ZXTestResult.m in Sources */,
-				023E697018C0EF26001FF123 /* ZXDataMatrixBlackBox1TestCase.m in Sources */,
-				023E697118C0EF26001FF123 /* ZXDataMatrixBlackBox2TestCase.m in Sources */,
-				023E697218C0EF26001FF123 /* ZXFalsePositives2BlackBoxTestCase.m in Sources */,
-				023E697318C0EF26001FF123 /* ZXFalsePositivesBlackBoxTestCase.m in Sources */,
-				023E697418C0EF26001FF123 /* ZXPartialBlackBoxTestCase.m in Sources */,
-				023E697518C0EF26001FF123 /* ZXUnsupportedBlackBoxTestCase.m in Sources */,
-				023E697618C0EF26001FF123 /* ZXCodabarBlackbox1TestCase.m in Sources */,
-				023E697718C0EF26001FF123 /* ZXCode128BlackBox1TestCase.m in Sources */,
-				023E697818C0EF26001FF123 /* ZXCode128BlackBox2TestCase.m in Sources */,
-				023E697918C0EF26001FF123 /* ZXCode128BlackBox3TestCase.m in Sources */,
-				023E697A18C0EF26001FF123 /* ZXCode39BlackBox1TestCase.m in Sources */,
-				023E697B18C0EF26001FF123 /* ZXCode39BlackBox3TestCase.m in Sources */,
-				023E697C18C0EF26001FF123 /* ZXCode39ExtendedBlackBox2TestCase.m in Sources */,
-				023E697D18C0EF26001FF123 /* ZXCode93BlackBox1TestCase.m in Sources */,
-				023E697E18C0EF26001FF123 /* ZXEAN13BlackBox1TestCase.m in Sources */,
-				023E697F18C0EF26001FF123 /* ZXEAN13BlackBox2TestCase.m in Sources */,
-				02DD029F1AC1DBAD009E4D65 /* ZXAztecDecoderTest.m in Sources */,
-				023E698018C0EF26001FF123 /* ZXEAN13BlackBox3TestCase.m in Sources */,
-				023E698118C0EF26001FF123 /* ZXEAN13BlackBox4TestCase.m in Sources */,
-				023E698218C0EF26001FF123 /* ZXEAN13BlackBox5BlurryTestCase.m in Sources */,
-				023E698318C0EF26001FF123 /* ZXEAN8BlackBox1TestCase.m in Sources */,
-				023E698418C0EF26001FF123 /* ZXITFBlackBox1TestCase.m in Sources */,
-				023E698518C0EF26001FF123 /* ZXITFBlackBox2TestCase.m in Sources */,
-				023E698618C0EF26001FF123 /* ZXRSSExpandedBlackBox1TestCase.m in Sources */,
-				023E698718C0EF26001FF123 /* ZXRSSExpandedBlackBox2TestCase.m in Sources */,
-				25B62E0718DDE9AA004782B1 /* ZXVINParsedResultTestCase.m in Sources */,
-				023E698818C0EF26001FF123 /* ZXRSSExpandedBlackBox3TestCase.m in Sources */,
-				023E698918C0EF26001FF123 /* ZXRSSExpandedStackedBlackBox1TestCase.m in Sources */,
-				023E698A18C0EF26001FF123 /* ZXRSSExpandedStackedBlackBox2TestCase.m in Sources */,
-				02DD02611AC07BD2009E4D65 /* ZXMathUtilsTestCase.m in Sources */,
-				023E698B18C0EF26001FF123 /* ZXRSS14BlackBox1TestCase.m in Sources */,
-				023E698C18C0EF26001FF123 /* ZXRSS14BlackBox2TestCase.m in Sources */,
-				023E698D18C0EF26001FF123 /* ZXUPCABlackBox1TestCase.m in Sources */,
-				023E698E18C0EF26001FF123 /* ZXUPCABlackBox2TestCase.m in Sources */,
-				023E698F18C0EF26001FF123 /* ZXUPCABlackBox3ReflectiveTestCase.m in Sources */,
-				023E699018C0EF26001FF123 /* ZXUPCABlackBox4TestCase.m in Sources */,
-				023E699118C0EF26001FF123 /* ZXUPCABlackBox5TestCase.m in Sources */,
-				023E699218C0EF26001FF123 /* ZXUPCABlackBox6BlurryTestCase.m in Sources */,
-				023E699318C0EF26001FF123 /* ZXUPCEANExtensionBlackBox1TestCase.m in Sources */,
-				023E699418C0EF26001FF123 /* ZXUPCEBlackBox1TestCase.m in Sources */,
-				023E699518C0EF26001FF123 /* ZXUPCEBlackBox2TestCase.m in Sources */,
-				023E699618C0EF26001FF123 /* ZXUPCEBlackBox3ReflectiveTestCase.m in Sources */,
-				023E699718C0EF26001FF123 /* ZXPDF417BlackBox1TestCase.m in Sources */,
-				023E699818C0EF26001FF123 /* ZXPDF417BlackBox2TestCase.m in Sources */,
-				023E699918C0EF26001FF123 /* ZXPDF417BlackBox3TestCase.m in Sources */,
-				023E699A18C0EF26001FF123 /* ZXPDF417BlackBox4TestCase.m in Sources */,
-				023E699B18C0EF26001FF123 /* ZXQRCodeBlackBox1TestCase.m in Sources */,
-				023E699C18C0EF26001FF123 /* ZXQRCodeBlackBox2TestCase.m in Sources */,
-				023E699D18C0EF26001FF123 /* ZXQRCodeBlackBox3TestCase.m in Sources */,
-				023E699E18C0EF26001FF123 /* ZXQRCodeBlackBox4TestCase.m in Sources */,
-				023E699F18C0EF26001FF123 /* ZXQRCodeBlackBox5TestCase.m in Sources */,
-				023E69A018C0EF26001FF123 /* ZXQRCodeBlackBox6TestCase.m in Sources */,
-				254040D9166AA0F100E13304 /* ZXAddressBookParsedResultTestCase.m in Sources */,
-				254040DA166AA0F100E13304 /* ZXCalendarParsedResultTestCase.m in Sources */,
-				254040DB166AA0F100E13304 /* ZXEmailAddressParsedResultTestCase.m in Sources */,
-				254040DC166AA0F100E13304 /* ZXExpandedProductParsedResultTestCase.m in Sources */,
-				254040DD166AA0F100E13304 /* ZXGeoParsedResultTestCase.m in Sources */,
-				254040DE166AA0F100E13304 /* ZXISBNParsedResultTestCase.m in Sources */,
-				254040DF166AA0F100E13304 /* ZXParsedReaderResultTestCase.m in Sources */,
-				254040E0166AA0F100E13304 /* ZXProductParsedResultTestCase.m in Sources */,
-				254040E1166AA0F100E13304 /* ZXSMSMMSParsedResultTestCase.m in Sources */,
-				02DD02951AC1C3B5009E4D65 /* ZXPlanarYUVLuminanceSourceTestCase.m in Sources */,
-				254040E2166AA0F100E13304 /* ZXTelParsedResultTestCase.m in Sources */,
-				254040E3166AA0F100E13304 /* ZXURIParsedResultTestCase.m in Sources */,
-				254040E4166AA0F100E13304 /* ZXWifiParsedResultTestCase.m in Sources */,
-				254040EC166AA0F100E13304 /* ZXBitArrayTestCase.m in Sources */,
-				254040ED166AA0F100E13304 /* ZXBitMatrixTestCase.m in Sources */,
-				254040EE166AA0F100E13304 /* ZXBitSourceBuilder.m in Sources */,
-				254040EF166AA0F100E13304 /* ZXBitSourceTestCase.m in Sources */,
-				254040F0166AA0F100E13304 /* ZXPerspectiveTransformTestCase.m in Sources */,
-				254040F1166AA0F100E13304 /* ZXStringUtilsTestCase.m in Sources */,
-				254040F4166AA0F100E13304 /* ZXDataMatrixDecodedBitStreamParserTestCase.m in Sources */,
-				25404109166AA0F100E13304 /* ZXAbstractExpandedDecoderTest.m in Sources */,
-				2540410A166AA0F100E13304 /* ZXAI01_3103_DecoderTest.m in Sources */,
-				2540410B166AA0F100E13304 /* ZXAI01_3202_3203_DecoderTest.m in Sources */,
-				2540410C166AA0F100E13304 /* ZXAI01_3X0X_1X_DecoderTest.m in Sources */,
-				2540410D166AA0F100E13304 /* ZXAnyAIDecoderTest.m in Sources */,
-				2540410E166AA0F100E13304 /* ZXRSSExpandedFieldParserTest.m in Sources */,
-				25404112166AA0F100E13304 /* ZXRSSExpandedImage2binaryTestCase.m in Sources */,
-				25404113166AA0F100E13304 /* ZXRSSExpandedImage2resultTestCase.m in Sources */,
-				25404114166AA0F100E13304 /* ZXRSSExpandedImage2stringTestCase.m in Sources */,
-				25404115166AA0F100E13304 /* ZXRSSExpandedInternalTestCase.m in Sources */,
-				25404116166AA0F100E13304 /* ZXBinaryUtil.m in Sources */,
-				25404117166AA0F100E13304 /* ZXBinaryUtilTest.m in Sources */,
-				25404118166AA0F100E13304 /* ZXBitArrayBuilderTest.m in Sources */,
-				25404119166AA0F100E13304 /* ZXRSSExpandedInformationDecoderTest.m in Sources */,
-				25404126166AA0F100E13304 /* ZXCodaBarWriterTestCase.m in Sources */,
-				255E986C18DF258C000A2681 /* ZXCode128WriterTestCase.m in Sources */,
-				25404128166AA0F100E13304 /* ZXEAN13WriterTestCase.m in Sources */,
-				25404129166AA0F100E13304 /* ZXEAN8WriterTestCase.m in Sources */,
-				2540412A166AA0F100E13304 /* ZXEANManufacturerOrgSupportTest.m in Sources */,
-				2540412C166AA0F100E13304 /* ZXUPCAWriterTestCase.m in Sources */,
-				2540412D166AA0F100E13304 /* ZXPDF417AbstractErrorCorrectionTestCase.m in Sources */,
-				2540412E166AA0F100E13304 /* ZXPDF417ECErrorCorrectionTestCase.m in Sources */,
-				25404131166AA0F100E13304 /* ZXQRCodeDataMaskTestCase.m in Sources */,
-				25404132166AA0F100E13304 /* ZXQRCodeErrorCorrectionLevelTestCase.m in Sources */,
-				25404133166AA0F100E13304 /* ZXQRCodeFormatInformationTestCase.m in Sources */,
-				024A231C18D3B292006AE14A /* ZXAztecDetectorTest.m in Sources */,
-				25404134166AA0F100E13304 /* ZXQRCodeModeTestCase.m in Sources */,
-				25404135166AA0F100E13304 /* ZXQRCodeDecodedBitStreamParserTestCase.m in Sources */,
-				25404136166AA0F100E13304 /* ZXQRCodeVersionTestCase.m in Sources */,
-				25404137166AA0F100E13304 /* ZXBitVectorTestCase.m in Sources */,
-				25404138166AA0F100E13304 /* ZXQRCodeEncoderTestCase.m in Sources */,
-				25404139166AA0F100E13304 /* ZXQRCodeMaskUtilTestCase.m in Sources */,
-				2540413A166AA0F100E13304 /* ZXQRCodeMatrixUtilTestCase.m in Sources */,
-				2540413B166AA0F100E13304 /* ZXQRCodeTestCase.m in Sources */,
-				25404142166AA0F100E13304 /* ZXQRCodeWriterTestCase.m in Sources */,
-				25FE5D4016D0B84C00826CDB /* ZXRSSExpandedStackedInternalTestCase.m in Sources */,
-				02DD029A1AC1C648009E4D65 /* ZXPDF417EncoderTestCase.m in Sources */,
-				25FE5D4316D0B8B200826CDB /* ZXTestCaseUtil.m in Sources */,
-				254299FB16D5DCC000D4C045 /* ZXDataMatrixWriterTestCase.m in Sources */,
-				25429A0016D5DFD800D4C045 /* ZXDataMatrixDebugPlacement.m in Sources */,
-				25429A0416D5E0ED00D4C045 /* ZXDataMatrixErrorCorrectionTestCase.m in Sources */,
-				25429A0816D5E21C00D4C045 /* ZXDataMatrixHighLevelEncodeTestCase.m in Sources */,
-				25429A0C16D5F4E000D4C045 /* ZXDataMatrixPlacementTestCase.m in Sources */,
-				25429A1016D5F66D00D4C045 /* ZXDataMatrixSymbolInfoTestCase.m in Sources */,
-				2504D9E916FFF2A900DF8882 /* ZXAztecEncoderTest.m in Sources */,
-				2504D9EC170005FE00DF8882 /* ZXReedSolomonTestCase.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -6533,11 +6228,6 @@
 /* End PBXSourcesBuildPhase section */
 
 /* Begin PBXTargetDependency section */
-		25403CCB166A96FA00E13304 /* PBXTargetDependency */ = {
-			isa = PBXTargetDependency;
-			target = 25403CB2166A96FA00E13304 /* ZXingObjC-iOS */;
-			targetProxy = 25403CCA166A96FA00E13304 /* PBXContainerItemProxy */;
-		};
 		2540417C166AADAC00E13304 /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
 			target = 25404165166AADAC00E13304 /* ZXingObjC-osx */;
@@ -6575,6 +6265,10 @@
 		02AF346F1672527F003B9255 /* Distribution */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
+				ARCHS = (
+					"$(ARCHS_STANDARD)",
+					armv7s,
+				);
 				CLANG_ENABLE_OBJC_ARC = YES;
 				COPY_PHASE_STRIP = NO;
 				DEAD_CODE_STRIPPING = NO;
@@ -6586,28 +6280,7 @@
 				PUBLIC_HEADERS_FOLDER_PATH = "$(PROJECT_NAME)Headers";
 				SKIP_INSTALL = YES;
 				STRIP_STYLE = "non-global";
-			};
-			name = Distribution;
-		};
-		02AF34701672527F003B9255 /* Distribution */ = {
-			isa = XCBuildConfiguration;
-			buildSettings = {
-				CLANG_ENABLE_OBJC_ARC = YES;
-				COMPRESS_PNG_FILES = NO;
-				FRAMEWORK_SEARCH_PATHS = (
-					"$(SDKROOT)/Developer/Library/Frameworks",
-					"$(inherited)",
-					"$(DEVELOPER_FRAMEWORKS_DIR)",
-				);
-				GCC_PRECOMPILE_PREFIX_HEADER = YES;
-				GCC_PREFIX_HEADER = "ZXingObjCTests/Supporting Files/Tests-iOS-Prefix.pch";
-				INFOPLIST_FILE = "ZXingObjCTests/Supporting Files/ZXingObjCTests-Info.plist";
-				OTHER_LDFLAGS = (
-					"-ObjC",
-					"-framework",
-					XCTest,
-				);
-				PRODUCT_NAME = "$(TARGET_NAME)";
+				VALID_ARCHS = "arm64 armv7 armv7s i386 x86_64";
 			};
 			name = Distribution;
 		};
@@ -6733,23 +6406,35 @@
 		25403CD9166A96FA00E13304 /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
+				ARCHS = (
+					"$(ARCHS_STANDARD)",
+					armv7s,
+				);
 				CLANG_ENABLE_OBJC_ARC = YES;
 				COPY_PHASE_STRIP = NO;
 				DEAD_CODE_STRIPPING = NO;
 				DSTROOT = /tmp/ZXingObjC.dst;
 				GCC_PRECOMPILE_PREFIX_HEADER = YES;
 				GCC_PREFIX_HEADER = "ios-Prefix.pch";
+				ONLY_ACTIVE_ARCH = NO;
 				OTHER_LDFLAGS = "-ObjC";
 				PRODUCT_NAME = "ZXingObjC-iOS";
 				PUBLIC_HEADERS_FOLDER_PATH = "$(PROJECT_NAME)Headers";
 				SKIP_INSTALL = YES;
 				STRIP_STYLE = "non-global";
+				VALID_ARCHS = "";
+				"VALID_ARCHS[sdk=iphoneos*]" = "arm64 armv7 armv7s";
+				"VALID_ARCHS[sdk=iphonesimulator*]" = "i386 x86_64";
 			};
 			name = Debug;
 		};
 		25403CDA166A96FA00E13304 /* Release */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
+				ARCHS = (
+					"$(ARCHS_STANDARD)",
+					armv7s,
+				);
 				CLANG_ENABLE_OBJC_ARC = YES;
 				COPY_PHASE_STRIP = NO;
 				DEAD_CODE_STRIPPING = NO;
@@ -6761,50 +6446,7 @@
 				PUBLIC_HEADERS_FOLDER_PATH = "$(PROJECT_NAME)Headers";
 				SKIP_INSTALL = YES;
 				STRIP_STYLE = "non-global";
-			};
-			name = Release;
-		};
-		25403CDC166A96FA00E13304 /* Debug */ = {
-			isa = XCBuildConfiguration;
-			buildSettings = {
-				CLANG_ENABLE_OBJC_ARC = YES;
-				COMPRESS_PNG_FILES = NO;
-				FRAMEWORK_SEARCH_PATHS = (
-					"$(SDKROOT)/Developer/Library/Frameworks",
-					"$(inherited)",
-					"$(DEVELOPER_FRAMEWORKS_DIR)",
-				);
-				GCC_PRECOMPILE_PREFIX_HEADER = YES;
-				GCC_PREFIX_HEADER = "ZXingObjCTests/Supporting Files/Tests-iOS-Prefix.pch";
-				INFOPLIST_FILE = "ZXingObjCTests/Supporting Files/ZXingObjCTests-Info.plist";
-				OTHER_LDFLAGS = (
-					"-ObjC",
-					"-framework",
-					XCTest,
-				);
-				PRODUCT_NAME = "$(TARGET_NAME)";
-			};
-			name = Debug;
-		};
-		25403CDD166A96FA00E13304 /* Release */ = {
-			isa = XCBuildConfiguration;
-			buildSettings = {
-				CLANG_ENABLE_OBJC_ARC = YES;
-				COMPRESS_PNG_FILES = NO;
-				FRAMEWORK_SEARCH_PATHS = (
-					"$(SDKROOT)/Developer/Library/Frameworks",
-					"$(inherited)",
-					"$(DEVELOPER_FRAMEWORKS_DIR)",
-				);
-				GCC_PRECOMPILE_PREFIX_HEADER = YES;
-				GCC_PREFIX_HEADER = "ZXingObjCTests/Supporting Files/Tests-iOS-Prefix.pch";
-				INFOPLIST_FILE = "ZXingObjCTests/Supporting Files/ZXingObjCTests-Info.plist";
-				OTHER_LDFLAGS = (
-					"-ObjC",
-					"-framework",
-					XCTest,
-				);
-				PRODUCT_NAME = "$(TARGET_NAME)";
+				VALID_ARCHS = "arm64 armv7 armv7s i386 x86_64";
 			};
 			name = Release;
 		};
@@ -7061,16 +6703,6 @@
 				25403CD9166A96FA00E13304 /* Debug */,
 				25403CDA166A96FA00E13304 /* Release */,
 				02AF346F1672527F003B9255 /* Distribution */,
-			);
-			defaultConfigurationIsVisible = 0;
-			defaultConfigurationName = Release;
-		};
-		25403CDB166A96FA00E13304 /* Build configuration list for PBXNativeTarget "Unit Tests iOS" */ = {
-			isa = XCConfigurationList;
-			buildConfigurations = (
-				25403CDC166A96FA00E13304 /* Debug */,
-				25403CDD166A96FA00E13304 /* Release */,
-				02AF34701672527F003B9255 /* Distribution */,
 			);
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;

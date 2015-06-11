@@ -45,16 +45,18 @@ static unichar ZX_CODA_DEFAULT_GUARD;
     BOOL endsAlt = [ZXCodaBarReader arrayContains:ZX_CODA_ALT_START_END_CHARS length:sizeof(ZX_CODA_ALT_START_END_CHARS) / sizeof(unichar) key:lastChar];
     if (startsNormal) {
       if (!endsNormal) {
-        @throw [NSException exceptionWithName:NSInvalidArgumentException
-                                       reason:[NSString stringWithFormat:@"Invalid start/end guards: %@", contents]
-                                     userInfo:nil];
+//        @throw [NSException exceptionWithName:NSInvalidArgumentException
+//                                       reason:[NSString stringWithFormat:@"Invalid start/end guards: %@", contents]
+//                                     userInfo:nil];
+        contents = [NSString stringWithFormat:@"%@A", contents];
       }
       // else already has valid start/end
     } else if (startsAlt) {
       if (!endsAlt) {
-        @throw [NSException exceptionWithName:NSInvalidArgumentException
-                                       reason:[NSString stringWithFormat:@"Invalid start/end guards: %@", contents]
-                                     userInfo:nil];
+//        @throw [NSException exceptionWithName:NSInvalidArgumentException
+//                                       reason:[NSString stringWithFormat:@"Invalid start/end guards: %@", contents]
+//                                     userInfo:nil];
+        contents = [NSString stringWithFormat:@"A%@", contents];
       }
       // else already has valid start/end
     } else {

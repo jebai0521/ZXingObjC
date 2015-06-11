@@ -44,13 +44,13 @@
                                  userInfo:nil];
   }
 
-  int sidesMargin = [self defaultMargin];
+  int sidesMargin = [self defaultMargin:format];
   if (hints && hints.margin) {
     sidesMargin = hints.margin.intValue;
   }
 
   ZXBoolArray *code = [self encode:contents];
-  return [self renderResult:code width:width height:height sidesMargin:sidesMargin];
+  return [self renderResultV2:code width:width height:height sidesMargin:sidesMargin];
 }
 
 /**
@@ -66,6 +66,37 @@
   int multiple = outputWidth / fullWidth;
   int leftPadding = (outputWidth - (inputWidth * multiple)) / 2;
 
+  ZXBitMatrix *output = [[ZXBitMatrix alloc] initWithWidth:outputWidth height:outputHeight];
+  for (int inputX = 0, outputX = leftPadding; inputX < inputWidth; inputX++, outputX += multiple) {
+    if (code.array[inputX]) {
+      [output setRegionAtLeft:outputX top:0 width:multiple height:outputHeight];
+    }
+  }
+  return output;
+}
+
+- (ZXBitMatrix *)renderResultV2:(ZXBoolArray *)code width:(int)width height:(int)height sidesMargin:(int)sidesMargin {
+  int inputWidth = code.length;
+  // Add quiet zone on both sides.
+  int fullWidth = inputWidth + (sidesMargin<<1);
+  int outputWidth = MAX(width, fullWidth);
+  int outputHeight = MAX(1, height);
+  
+  // 缩放倍数
+  int multiple = 1;
+  
+  if (fullWidth > outputWidth)
+  {
+    outputWidth = fullWidth;
+  }
+  else
+  {
+    multiple = outputWidth / fullWidth;
+    outputWidth = fullWidth * multiple;
+  }
+  
+  int leftPadding = sidesMargin * multiple;
+  
   ZXBitMatrix *output = [[ZXBitMatrix alloc] initWithWidth:outputWidth height:outputHeight];
   for (int inputX = 0, outputX = leftPadding; inputX < inputWidth; inputX++, outputX += multiple) {
     if (code.array[inputX]) {
@@ -92,6 +123,13 @@
     color = !color; // flip color after each segment
   }
   return numAdded;
+}
+
+- (int)defaultMargin:(ZXBarcodeFormat)format {
+  // CodaBar spec requires a side margin to be more than ten times wider than narrow space.
+  // This seems like a decent idea for a default for all formats.
+  return format == kBarcodeFormatCodabar ? 10 : 0;
+
 }
 
 - (int)defaultMargin {

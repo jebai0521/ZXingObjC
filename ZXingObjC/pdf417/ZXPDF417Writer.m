@@ -25,7 +25,7 @@
 /**
  * default white space (margin) around the code
  */
-const int ZX_PDF417_WHITE_SPACE = 30;
+const int ZX_PDF417_WHITE_SPACE = 5;
 
 @implementation ZXPDF417Writer
 
@@ -76,10 +76,22 @@ const int ZX_PDF417_WHITE_SPACE = 30;
   if (![encoder generateBarcodeLogic:contents errorCorrectionLevel:errorCorrectionLevel error:error]) {
     return nil;
   }
+  
+  
 
-  int lineThickness = 2;
-  int aspectRatio = 4;
-  NSArray *originalScale = [[encoder barcodeMatrix] scaledMatrixWithXScale:lineThickness yScale:aspectRatio * lineThickness];
+//  int lineThickness = 2;
+//  int aspectRatio = 4;
+  
+  ZXPDF417BarcodeMatrix* barcodeMatrix = [encoder barcodeMatrix];
+  
+  int cols = barcodeMatrix.width;
+  int rows = barcodeMatrix.height;
+  
+  int lineThickness = width / (cols + 69);
+  int aspectRatio = height / (lineThickness * rows);
+
+  
+  NSArray *originalScale = [barcodeMatrix scaledMatrixWithXScale:lineThickness yScale:aspectRatio * lineThickness];
   BOOL rotated = NO;
   if ((height > width) ^ ([(ZXByteArray *)originalScale[0] length] < [originalScale count])) {
     originalScale = [self rotateArray:originalScale];
@@ -98,7 +110,7 @@ const int ZX_PDF417_WHITE_SPACE = 30;
 
   if (scale > 1) {
     NSArray *scaledMatrix =
-      [[encoder barcodeMatrix] scaledMatrixWithXScale:scale * lineThickness yScale:scale * aspectRatio * lineThickness];
+      [barcodeMatrix scaledMatrixWithXScale:scale * lineThickness yScale:scale * aspectRatio * lineThickness];
     if (rotated) {
       scaledMatrix = [self rotateArray:scaledMatrix];
     }
