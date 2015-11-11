@@ -39,10 +39,22 @@ const int ZX_EAN13_CODE_WIDTH = 3 + // start guard
 }
 
 - (ZXBoolArray *)encode:(NSString *)contents {
-  if ([contents length] != 13) {
+ 
+  if ([contents length] == 12) {
+    int sum = 0;
+    for (int i = 0; i < [contents length]; ++i) {
+      sum += ([contents characterAtIndex:i] - '0') * (i % 2 == 0 ? 1 : 3);
+    }
+    
+    contents = [contents stringByAppendingFormat:@"%d", (1000 - sum) % 10];
+    
+  } else if ([contents length] != 13) {
     [NSException raise:NSInvalidArgumentException
-                format:@"Requested contents should be 13 digits long, but got %d", (int)[contents length]];
+                format:@"Requested contents should be 13 or 12 digits long, but got %d", (int)[contents length]];
   }
+  
+  
+  NSLog(@"content is ==> %@", contents);
 
   if (![ZXUPCEANReader checkStandardUPCEANChecksum:contents]) {
     [NSException raise:NSInvalidArgumentException

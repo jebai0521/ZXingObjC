@@ -26,10 +26,12 @@ const NSStringEncoding ZX_AZTEC_DEFAULT_ENCODING = NSISOLatin1StringEncoding;
 @implementation ZXAztecWriter
 
 - (ZXBitMatrix *)encode:(NSString *)contents format:(ZXBarcodeFormat)format width:(int)width height:(int)height error:(NSError **)error {
+  NSLog(@"1111 width ==> %d height ==> %d", width, height);
   return [self encode:contents format:format width:width height:height hints:nil error:error];
 }
 
 - (ZXBitMatrix *)encode:(NSString *)contents format:(ZXBarcodeFormat)format width:(int)width height:(int)height hints:(ZXEncodeHints *)hints error:(NSError **)error {
+  NSLog(@"2222 width ==> %d height ==> %d", width, height);
   NSStringEncoding encoding = hints.encoding;
   NSNumber *eccPercent = hints.errorCorrectionPercent;
   NSNumber *layers = hints.aztecLayers;
@@ -72,6 +74,11 @@ const NSStringEncoding ZX_AZTEC_DEFAULT_ENCODING = NSISOLatin1StringEncoding;
   int multiple = MIN(outputWidth / inputWidth, outputHeight / inputHeight);
   int leftPadding = (outputWidth - (inputWidth * multiple)) / 2;
   int topPadding = (outputHeight - (inputHeight * multiple)) / 2;
+  
+  NSLog(@"3333 width ==> %d height ==> %d", width, height);
+  NSLog(@"inputwidth ==> %d inputheight ==> %d", inputWidth, inputHeight);
+  NSLog(@"outputWidth ==> %d outputHeight ==> %d", outputWidth, outputHeight);
+  NSLog(@"leftPadding ==> %d topPadding ==> %d multiple ==> %d", leftPadding, topPadding, multiple);
 
   ZXBitMatrix *output = [[ZXBitMatrix alloc] initWithWidth:outputWidth height:outputHeight];
 

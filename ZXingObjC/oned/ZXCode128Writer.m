@@ -36,7 +36,7 @@ const unichar ZX_CODE128_ESCAPE_FNC_4 = L'\u00f4';
 - (ZXBoolArray *)encode:(NSString *)contents {
   int length = (int)[contents length];
   // Check length
-  if (length < 1 || length > 80) {
+  if (length < 1/* || length > 80*/) {
     [NSException raise:NSInvalidArgumentException format:@"Contents length should be between 1 and 80 characters, but got %d", length];
   }
   // Check content
